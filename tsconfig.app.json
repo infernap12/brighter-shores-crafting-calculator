@@ -29,7 +29,7 @@
     "noUncheckedSideEffectImports": true
   },
   "include": [
-    "src",
-    "./node_modules/types-mediawiki"
-  ]
+    "src"
+  ],
+  "exclude": ["node_modules/@vue"]
 }

@@ -4,22 +4,7 @@
 
 import { ApiParams } from "types-mediawiki/api_params"
 
-declare global {
-	namespace smw {
-		class Api {
-			constructor(options: {
-				url: string,
-				user?: string,
-				password?: string,
-				agent?: string,
-				timeout?: number,
-				maxlag?: number,
-				maxlagDelay?: number,
-				maxlagWarn?: number,
-			})
-		}
-	}
-}
+
 
 type timestamp = string;
 type expiry = string;

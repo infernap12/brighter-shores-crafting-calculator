@@ -1,8 +1,13 @@
 import {Weapon} from "@/domain/models/weapon.ts";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
+import {Material} from "@/domain/models/material.ts";
 
-export function WeaponCard({weapon, totalXp}: { weapon: Weapon, totalXp: number }) {
+export function WeaponCard({weapon, calculations, materials}: {
+	weapon: Weapon,
+	calculations: { totalXp: number },
+	materials: Map<string, Material>
+}) {
 	return (
 		<Card>
 			<CardHeader>
@@ -19,12 +24,16 @@ export function WeaponCard({weapon, totalXp}: { weapon: Weapon, totalXp: number 
 				</Avatar>
 				<div className="w-full text-left">
 
-					{weapon.profession} XP: {weapon.xp}({totalXp})<br/>
-					KP: {weapon.kp}<br/>
+					{weapon.profession} XP: {weapon.xp}({calculations.totalXp})<br/>
+					KP: {weapon.kp}%<br/>
 					Level: {weapon.level} - {weapon.levelMax}<br/>
 				</div>
-				{weapon.recipe.materials.map(material => (
-					<WeaponMaterialRow key={material.materialName} material={material}/>
+				{weapon.recipe.materials.map(wepMat => (
+					<WeaponMaterialRow
+						key={wepMat.materialName}
+						material={materials.get(wepMat.materialName)!}
+						quantity={wepMat.quantity}
+					/>
 				))}
 				<div>
 					Facility: {weapon.recipe.facility}
@@ -37,12 +46,18 @@ export function WeaponCard({weapon, totalXp}: { weapon: Weapon, totalXp: number 
 	)
 }
 
-interface WeaponMaterialRowProps {
-	material: { materialName: string; quantity: number }
-}
-
-export function WeaponMaterialRow({material}: WeaponMaterialRowProps) {
+export function WeaponMaterialRow({material, quantity}: { material: Material, quantity: number }) {
 	return (
-		<div>{material.materialName}: {material.quantity}</div>
+		<div className="flex items-center gap-2 w-full">
+			<Avatar className="h-8 w-8">
+				<AvatarImage src={material.imageUrl} alt="Image"/>
+				<AvatarFallback>ImageError</AvatarFallback>
+			</Avatar>
+			<div className="flex w-full">
+				<div className="flex-1">{material.name}</div>
+				<div className="w-24">Qty: {quantity}</div>
+				<div className="w-24">Cost: {100 * quantity}</div>
+			</div>
+		</div>
 	)
 }

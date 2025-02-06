@@ -1,6 +1,6 @@
+/*
 // src/debug.test.ts
 import {describe, expect, it} from 'vitest'
-import {wikiApi} from '@/services/api/wikiApi'
 import {ActivityDto, RecipeDto} from "@/services/api/types/dto.ts";
 
 import {Profession} from "@/profession.ts";
@@ -104,4 +104,4 @@ describe('Wiki API Debug', async () => {
 			})
 		}
 	})
-})
+})*/

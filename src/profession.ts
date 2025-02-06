@@ -28,3 +28,8 @@ export enum Faction {
 	Guardian = "Guardian",
 	Hammermage = "Hammermage"
 }
+
+export type WeaponProfession
+	= Profession.Stonemason
+	| Profession.Blacksmith
+	| Profession.Bonewright

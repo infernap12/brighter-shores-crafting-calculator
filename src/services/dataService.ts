@@ -1,3 +1,4 @@
+/*
 import {Weapon} from "@/domain/models/weapon.ts";
 import {Material} from "@/domain/models/material.ts";
 import {wikiApi} from "@/services/api/wikiApi.ts";
@@ -8,11 +9,11 @@ import {Activity} from "@/domain/models/activity.ts";
 import {Result} from "@/services/api/askApi";
 
 const profs = [
-	// Profession.Blacksmith,
+	Profession.Blacksmith,
 	Profession.Stonemason,
-	// Profession.Bonewright,
+	Profession.Bonewright,
 	Profession.Miner,
-	// Profession.Gatherer,
+	Profession.Gatherer,
 	Profession.Woodcutter,
 	Profession.Carpenter,
 ]
@@ -21,7 +22,7 @@ class DataService {
 	async getProcessedData(): Promise<ProcessedData> {
 		const rawMaterialsData = await wikiApi.fetchItemsForProfessions(profs)
 		const materials = this.mapMats(rawMaterialsData)
-		const rawWeaponsData = await wikiApi.fetchWeapons()
+		const rawWeaponsData = await wikiApi.useWikiWeapons()
 		const weapons = this.mapWep(rawWeaponsData)
 
 		return {
@@ -104,4 +105,4 @@ export interface ProcessedData {
 	materials: Map<string, Material>;
 }
 
-export const dataService = new DataService()
+export const dataService = new DataService()*/

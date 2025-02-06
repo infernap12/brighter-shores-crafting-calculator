@@ -5,6 +5,7 @@
 //   const ask = Convert.toAsk(json);
 
 export interface Ask {
+	"query-continue-offset"?: number;
 	query: Query;
 }
 
@@ -43,6 +44,14 @@ export enum Typeid {
 	Page = "_wpg",
 }
 
+export interface askParams {
+	limit?: number,
+	offset?: number,
+	mainlabel?: string,
+	sort?: Printrequests[],
+	order?: ("asc" | "desc")[]
+}
+
 export interface Result extends WikiPage{
 	printouts: Printouts;
 }
@@ -54,6 +63,10 @@ export interface WikiPage {
 	exists:       string;
 	displaytitle: string;
 }
+
+export type Printrequests = keyof Printouts | "-Dropped item.Dropped from.Activity JSON";
+
+
 
 export interface Printouts {
 	"Activity JSON"?:            string[];
@@ -79,6 +92,7 @@ export interface Printouts {
 	"Bounty name"?:              WikiPage[];
 	"Bounty quantity"?:          number[];
 	"Bounty start"?:             WikiPage[];
+	Category?:                   WikiPage[];
 	Clues?:                      number[];
 	"Coins high"?:               number[];
 	"Coins low"?:                number[];

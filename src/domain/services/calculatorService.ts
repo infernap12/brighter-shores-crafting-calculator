@@ -3,8 +3,6 @@ import {Material} from "@/domain/models/material.ts";
 import {Profession} from "@/profession.ts";
 
 export function resolveTotalXp(item: Weapon, mats: Map<string, Material>): number {
-	console.log(item);
-	console.log(mats);
 	let totalXp = 0;
 
 	for (const materialDto of item.recipe.materials) {
@@ -45,4 +43,19 @@ function recursiveMat(material: Material, targetProfession: Profession, material
 	}
 
 	return totalXp;
+}
+
+export function resolveClassic(weapon: Weapon, mats: Map<string, Material>): number {
+	console.log("Resolving Classic: " + weapon.fullName)
+	const hydratedMats = weapon.recipe.materials.map(mat => {
+		const material = mats.get(mat.materialName);
+		if (!material) {
+			throw new Error(`Material not found: ${mat.materialName}`);
+		}
+		return {material, quantity: mat.quantity};
+	})
+	const primaryMat = hydratedMats.find((mat) => {
+		return mat.material.profession === weapon.recipe.profession
+	})!
+	return primaryMat.quantity * primaryMat.material.recipe!.xp + weapon.recipe.xp;
 }

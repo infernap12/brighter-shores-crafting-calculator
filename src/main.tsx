@@ -4,19 +4,43 @@ import {ComponentPreviews, useInitial} from "@/dev";
 import './index.css'
 import App from './App.tsx'
 import React from 'react';
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {QueryClient} from "@tanstack/react-query";
+import {PersistQueryClientOptions, PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
+import {createIDBPersister} from "@/services/api/idbPersist.ts";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			gcTime: Infinity,
+			staleTime: 1 * 60 * 60 * 1000,
+		},
+	},
+})
+
+const persister = createIDBPersister()
+
+// const persister = createSyncStoragePersister({
+// 	storage: window.localStorage,
+// 	serialize: (data) => compress(JSON.stringify(data)),
+// 	deserialize: (data) => JSON.parse(decompress(data)),
+// })
+
+const persistClientOptions: PersistQueryClientOptions = {
+	maxAge: Infinity,
+	persister: persister,
+	queryClient: queryClient
+}
+
 
 createRoot(document.getElementById('root')!).render(
 	<React.StrictMode>
-		<QueryClientProvider client={queryClient}>
+		<PersistQueryClientProvider client={queryClient} persistOptions={persistClientOptions}>
 			<DevSupport
 				ComponentPreviews={ComponentPreviews}
 				useInitialHook={useInitial}
 			>
 				<App/>
 			</DevSupport>
-		</QueryClientProvider>
+		</PersistQueryClientProvider>
 	</React.StrictMode>,
 )
