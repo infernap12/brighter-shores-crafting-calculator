@@ -1,9 +1,12 @@
-import {Weapon} from "@/domain/models/weapon.ts";
+import {Product} from "@/domain/models/product.ts";
 import {Material} from "@/domain/models/material.ts";
 import {Profession} from "@/profession.ts";
 
-export function resolveTotalXp(item: Weapon, mats: Map<string, Material>): number {
+export function resolveTotalXp(item: Product, mats: Map<string, Material> | null): number {
 	let totalXp = 0;
+	if (!mats) {
+		return 0;
+	}
 
 	for (const materialDto of item.recipe.materials) {
 		const material = mats.get(materialDto.materialName);
@@ -45,7 +48,7 @@ function recursiveMat(material: Material, targetProfession: Profession, material
 	return totalXp;
 }
 
-export function resolveClassic(weapon: Weapon, mats: Map<string, Material>): number {
+export function resolveClassic(weapon: Product, mats: Map<string, Material>): number {
 	console.log("Resolving Classic: " + weapon.fullName)
 	const hydratedMats = weapon.recipe.materials.map(mat => {
 		const material = mats.get(mat.materialName);

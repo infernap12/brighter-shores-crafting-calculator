@@ -3,12 +3,13 @@ import {UserData} from "@/App.tsx";
 import {Avatar, AvatarImage} from "@/components/ui/avatar";
 import {Material} from "@/domain/models/material.ts";
 
-export function MetricsCard({metrics, showPurchased, materials}: {
+export function MetricsCard({metrics, userData, materials}: {
 	metrics: CraftingMetrics,
-	showPurchased: UserData,
+	userData: UserData,
 	materials: Map<string, Material>
 }) {
-	console.log(showPurchased)
+	console.log(userData)
+	const showPurchased = userData.isPrimaryPurchased;
 	return (
 		<div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
 			<h3 className="font-semibold mb-4">Crafting Summary</h3>
@@ -48,9 +49,15 @@ export function MetricsCard({metrics, showPurchased, materials}: {
 									<span>{material.name}</span>
 								</div>
 								<span className="text-center">Craft: {balance.produced.toFixed()}</span>
-								<span className="text-right">
-									{new Date(time * 1000).toISOString().slice(11, 19) /* Formats as HH:mm:ss */}
-								</span>
+								{material.recipe || material.activity ? (
+									<span className="text-right">
+										{new Date(time * 1000).toISOString().slice(11, 19) /* Formats as HH:mm:ss */}
+									</span>
+								) : (
+									<span className="text-right">
+										Cost: {((showPurchased ? material.value : material.cost) * balance.produced).toLocaleString()}
+									</span>
+								)}
 							</div>
 						)
 					})}

@@ -18,13 +18,28 @@ const urlParams = (query: string, maxlag: number = 5) => {
 	return new URLSearchParams({action: 'ask', query: query, format: 'json', maxlag: maxlag.toString()})
 };
 
+
+/**
+ * Parameters for constructing a wiki query for fetching data.
+ *
+ * @interface WikiQueryParams
+ * @property {string} [name] - The name of the wiki page to filter results by
+ * @property {Array<string>} [categoriesOR] - Categories where at least one is required (OR condition)
+ * @property {Array<string>} [categoriesAND] - Categories where all are required (AND condition)
+ * @property {Array<Profession>} [professionA] - Professions where at least one is required (OR condition)
+ * @property {Array<Printrequests>} printRequests - Properties to return in the result for each matched page
+ * @property {askParams} askParams - Additional query parameters (limit, offset, sorting, etc.)
+ */
 interface WikiQueryParams {
+	name?: string;
+	passive?: boolean;
 	categoriesOR?: string[];
 	categoriesAND?: string[];
 	professionA?: Profession[];
 	printRequests: Printrequests[];
 	askParams: askParams;
 }
+
 
 
 export class WikiApi{
@@ -34,11 +49,17 @@ export class WikiApi{
 			: "";
 
 		const categoryANDConditions = params.categoriesAND?.length
-			? params.categoriesAND.map(cat => `[[Category:${cat}]]`).join(" ")
+			? params.categoriesAND.map(category => `[[Category:${category}]]`).join(" ")
 			: "";
 
 		const professionConditions = params.professionA?.length
 			? `[[Profession A::${params.professionA.join("||")}]]`
+			: "";
+
+		const nameCondition = params.name ? `[[${params.name}]]` : "";
+
+		const passiveCondition = params.passive !== undefined
+			? `[[Passive::${params.passive}]]`
 			: "";
 
 		const printRequests = params.printRequests
@@ -54,7 +75,7 @@ export class WikiApi{
 			params.askParams?.order?.length ? ` |?order=${params.askParams.order.join(",")}` : ""
 		].join("");
 
-		return `${categoryORConditions}${categoryANDConditions}${professionConditions} ${printRequests}${askParams}`;
+		return `${nameCondition}${passiveCondition}${categoryORConditions}${categoryANDConditions}${professionConditions} ${printRequests}${askParams}`;
 	}
 
 	static async fetchWikiPage(params: WikiQueryParams): Promise<Ask> {

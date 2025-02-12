@@ -33,3 +33,28 @@ export type WeaponProfession
 	= Profession.Stonemason
 	| Profession.Blacksmith
 	| Profession.Bonewright
+
+export const professionProperties = {
+	[Profession.Alchemist]: {outputCategory: 'Potion'},
+	[Profession.Armorer]: {outputCategory: 'Armor'}, // todo
+	[Profession.Blacksmith]: {outputCategory: 'Weapons'},
+	[Profession.Bonewright]: {outputCategory: 'Weapons'},
+	[Profession.Builder]: {outputCategory: 'Buildings?'}, // todo
+	[Profession.Carpenter]: {outputCategory: 'posts?'}, // todo
+	[Profession.Chef]: {outputCategory: 'Food?'}, // todo
+	[Profession.Delver]: {outputCategory: 'worms?'}, //todo
+	[Profession.Detective]: {outputCategory: 'Clues?'}, // todo
+	[Profession.Fisher]: {outputCategory: 'Fish'}, // todo
+	[Profession.Forager]: {outputCategory: 'Herbs'}, // todo
+	[Profession.Gatherer]: {outputCategory: 'Resources'}, // todo
+	[Profession.Guard]: {outputCategory: 'Protection'}, // todo
+	[Profession.Merchant]: {outputCategory: 'Goods'}, // todo
+	[Profession.Minefighter]: {outputCategory: 'Battle?'}, // todo
+	[Profession.Miner]: {outputCategory: 'Ores'}, // todo
+	[Profession.Scout]: {outputCategory: 'Information'}, // todo
+	[Profession.Shieldbearer]: {outputCategory: 'Defense'}, // todo
+	[Profession.Watchperson]: {outputCategory: 'Surveillance'}, // todo
+	[Profession.Woodcutter]: {outputCategory: 'Lumber'}, // todo
+	[Profession.Stonemason]: {outputCategory: 'Weapons'},
+	[Profession.Leatherworker]: {outputCategory: 'Leather'},
+} as const;

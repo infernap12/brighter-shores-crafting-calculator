@@ -1,4 +1,4 @@
-import {Weapon} from "@/domain/models/weapon.ts";
+
 import {useEffect} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {ceil} from "@/lib/utils.ts";
@@ -7,6 +7,7 @@ import {Material} from "@/domain/models/material.ts";
 import {Profession} from "@/profession.ts";
 import {useWeaponXPCalculations} from "@/hooks/useWeaponXPCalculations.ts";
 import {useFilteredWeapons} from "@/hooks/useFilteredWeapons.ts";
+import {Product} from "@/domain/models/product.ts";
 
 interface WeaponFilters {
 	profession: Profession;
@@ -18,12 +19,13 @@ interface XPCalculationInputs {
 	materials: Map<string, Material>;
 }
 
-export function DataTableContainer({weapons, filters, calculationInputs, onSelectWeapon, selectedWeapon}: {
-	weapons: Map<string, Weapon>;
+export function DataTableContainer({weapons, filters, calculationInputs, onSelectWeapon, selectedWeapon, isNonReady}: {
+	weapons: Map<string, Product>;
 	filters: WeaponFilters;
 	calculationInputs: XPCalculationInputs;
-	onSelectWeapon: (weapon: Weapon) => void
-	selectedWeapon: Weapon | null;
+	onSelectWeapon: (weapon: Product) => void
+	selectedWeapon: Product | null;
+	isNonReady: boolean;
 }) {
 	const filteredWeapons = useFilteredWeapons(weapons, filters);
 
@@ -43,20 +45,23 @@ export function DataTableContainer({weapons, filters, calculationInputs, onSelec
 			weapons={filteredWeapons}
 			calculationInputs={calculationInputs}
 			onSelectWeapon={onSelectWeapon}
+			isNonReady={isNonReady}
 		/>
 	);
 }
 function WeaponTable({
 	weapons,
 	calculationInputs,
-	onSelectWeapon
+	onSelectWeapon,
+	isNonReady,
 }:{
-	weapons: Weapon[];
+	weapons: Product[];
 	calculationInputs: XPCalculationInputs;
-	onSelectWeapon: (weapon: Weapon) => void;
+	onSelectWeapon: (weapon: Product) => void;
+	isNonReady: boolean;
 }) {
 
-	const weaponXp = useWeaponXPCalculations(weapons, calculationInputs);
+	const weaponXp = useWeaponXPCalculations(weapons, calculationInputs, isNonReady);
 
 	return (
 		<Table>
@@ -78,7 +83,7 @@ function WeaponTable({
 			<TableBody>
 				{
 					weapons
-						.map((weapon: Weapon) => {
+						.map((weapon: Product) => {
 							const totalXp = weaponXp.get(weapon.fullName);
 							if (totalXp === undefined) {
 								return null;

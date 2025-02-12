@@ -1,20 +1,23 @@
-import {Weapon} from "@/domain/models/weapon.ts";
+import {Product} from "@/domain/models/product.ts";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
 import {Material} from "@/domain/models/material.ts";
 
 export function WeaponCard({weapon, calculations, materials}: {
-	weapon: Weapon,
+	weapon: Product,
 	calculations: { totalXp: number },
 	materials: Map<string, Material>
 }) {
+	console.log(weapon)
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>
-					{weapon.variant ?? "dave"}<br/>
-					{weapon.name}
-				</CardTitle>
+				<a href={weapon.link} target="_blank" rel="noopener noreferrer">
+					<CardTitle>
+						{weapon.variant ?? "dave"}<br/>
+						{weapon.name}
+					</CardTitle>
+				</a>
 				<CardDescription>{weapon.faction}</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col items-center space-y-4">
@@ -56,7 +59,7 @@ export function WeaponMaterialRow({material, quantity}: { material: Material, qu
 			<div className="flex w-full">
 				<div className="flex-1">{material.name}</div>
 				<div className="w-24">Qty: {quantity}</div>
-				<div className="w-24">Cost: {100 * quantity}</div>
+				<div className="w-24">Cost: {material.cost * quantity}</div>
 			</div>
 		</div>
 	)

@@ -1,6 +1,6 @@
 // hooks/useFilteredWeapons.ts
 import { useMemo } from 'react';
-import { Weapon } from '@/domain/models/weapon.ts';
+import { Product } from '@/domain/models/product.ts';
 import { Profession } from '@/profession.ts';
 
 export interface WeaponFilters {
@@ -8,7 +8,7 @@ export interface WeaponFilters {
 	maxLevel: number | null;
 }
 
-export function useFilteredWeapons(weapons: Map<string, Weapon>, filters: WeaponFilters) {
+export function useFilteredWeapons(weapons: Map<string, Product>, filters: WeaponFilters) {
 	return useMemo(() => {
 		return Array.from(weapons.values())
 			.filter((weapon) => weapon.profession === filters.profession)
