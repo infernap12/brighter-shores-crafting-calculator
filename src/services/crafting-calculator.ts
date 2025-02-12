@@ -1,6 +1,6 @@
 import {Profession} from "@/profession.ts";
 import {Material} from "@/domain/models/material.ts";
-import {Weapon} from "@/domain/models/weapon.ts";
+import {Product} from "@/domain/models/product.ts";
 
 interface MaterialBalance {
 	required: number;    // How much we need
@@ -9,16 +9,8 @@ interface MaterialBalance {
 	batches: number;     // How many craft/gather operations
 }
 
-export interface CraftingMetrics {
-	professionTotals: Map<Profession, ProfessionMetrics>;
-	materialBalances: Map<string, MaterialBalance>;
-	totalDuration: number;
-	totalXp: number;
-	totalKp: number;
-}
-
 export function calculateCraftingMetrics(
-	weapon: Weapon,
+	weapon: Product,
 	quantity: number,
 	materials: Map<string, Material>,
 	existingExcess: Map<string, number> = new Map()
@@ -30,6 +22,7 @@ export function calculateCraftingMetrics(
 		totalXp: 0,
 		totalKp: 0
 	};
+
 
 	function processItem(material: Material, requiredQuantity: number): MaterialBalance {
 		console.log(`Processing ${material.name} (${requiredQuantity})`);
@@ -98,6 +91,30 @@ export function calculateCraftingMetrics(
 			return balance;
 		}
 
+		if (material.cost && material.value) {
+			const batches = remainingNeeded;
+			const produced = batches;
+			const balance = {
+				required: requiredQuantity,
+				produced,
+				excess: produced + availableExcess - requiredQuantity,
+				batches
+			};
+
+			const current = metrics.professionTotals.get(material.profession) || { duration: 0, xp: 0, kp: 0 };
+			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For activity`)
+			metrics.professionTotals.set(material.profession, {
+				duration: current.duration + material.duration * batches,
+				xp: current.xp + material.xp * batches,
+				kp: current.kp + material.kp * batches
+			})
+			metrics.totalDuration += material.duration * batches;
+			metrics.totalXp += material.xp * batches;
+			metrics.totalKp += material.kp * batches;
+
+			return balance;
+		}
+
 		throw new Error(`No recipe or activity found for ${material.name}`);
 	}
 
@@ -122,6 +139,14 @@ export function calculateCraftingMetrics(
 	}
 
 	return metrics;
+}
+
+export interface CraftingMetrics {
+	professionTotals: Map<Profession, ProfessionMetrics>;
+	materialBalances: Map<string, MaterialBalance>;
+	totalDuration: number;
+	totalXp: number;
+	totalKp: number;
 }
 
 interface ProfessionMetrics {

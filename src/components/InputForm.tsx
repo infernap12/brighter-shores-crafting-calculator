@@ -177,7 +177,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
-									{[Profession.Blacksmith, Profession.Stonemason, Profession.Bonewright].map((prof) => (
+									{[Profession.Blacksmith, Profession.Stonemason, Profession.Bonewright, Profession.Leatherworker].map((prof) => (
 										<SelectItem key={prof} value={prof}>
 											{prof}
 										</SelectItem>

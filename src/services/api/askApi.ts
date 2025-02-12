@@ -44,6 +44,19 @@ export enum Typeid {
 	Page = "_wpg",
 }
 
+
+/**
+ * Parameters for querying data.
+ *
+ * @property {number} [limit] - The maximum number of results to return.
+ * @property {number} [offset] - The offset to start returning data from, used for pagination.
+ *							   For example, if there are 100 total items, a limit of 50 with an offset of 50
+ *							   will return items 51-100.
+ * @property {string} [mainlabel] - Controls the printing of default printouts like the page name, URL, etc.
+ *								  Setting this to "-" (a minus symbol) will remove the default printouts.
+ * @property {Printrequests[]} [sort] - A list of properties to sort the results by.
+ * @property {("asc" | "desc")[]} [order] - An optional list specifying the sorting order for each property.
+ */
 export interface askParams {
 	limit?: number,
 	offset?: number,
@@ -64,7 +77,11 @@ export interface WikiPage {
 	displaytitle: string;
 }
 
-export type Printrequests = keyof Printouts | "-Dropped item.Dropped from.Activity JSON";
+export type Printrequests =
+	keyof Printouts
+	| "-Dropped item.Dropped from.Activity JSON=Activity JSON"
+	| "-Sold item.Shop buy price=Shop buy price"
+	| "-Sold item.Shop sell price=Shop sell price";
 
 
 
