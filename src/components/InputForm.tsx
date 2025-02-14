@@ -14,15 +14,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {Switch} from "@/components/ui/switch.tsx";
 
 const formSchema = z.object({
 	profession: z.nativeEnum(Profession),
-	isPrimaryPurchased: z.boolean(),
-	isPlankPurchased: z.boolean(),
-	isLogPurchased: z.boolean(),
-	useManualSellPrice: z.boolean(),
-	itemLevel: z.number().positive("Level must be greater than 0"),
 	currentLevel: z.number()
 		.nullable()
 		.refine(
@@ -83,11 +77,6 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			profession: Profession.Stonemason,
-			isPrimaryPurchased: false,
-			isPlankPurchased: false,
-			isLogPurchased: false,
-			useManualSellPrice: false,
-			itemLevel: 1,
 			currentLevel: 1,
 			targetLevel: 10,
 			currentXP: undefined,
@@ -143,12 +132,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 
 
 			// Only trigger parent onChange if we have all required values
-			if (values.profession !== undefined &&
-				values.isPrimaryPurchased !== undefined &&
-				values.isPlankPurchased !== undefined &&
-				values.isLogPurchased !== undefined &&
-				values.useManualSellPrice !== undefined &&
-				values.itemLevel !== undefined) {
+			if (values.profession !== undefined) {
 				onChange(values);
 			}
 			void form.trigger();
@@ -184,108 +168,6 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 									))}
 								</SelectContent>
 							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{/* Purchase Options */}
-				<div className="grid grid-cols-2 gap-4">
-					<FormField
-						control={form.control}
-						name="isPrimaryPurchased"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Switch
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>
-										Purchase Primary Material
-									</FormLabel>
-								</div>
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="useManualSellPrice"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Switch
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>
-										Use Manual Sell Price
-									</FormLabel>
-								</div>
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="isPlankPurchased"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Switch
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>
-										Purchase Planks
-									</FormLabel>
-								</div>
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="isLogPurchased"
-						render={({ field }) => (
-							<FormItem className="flex flex-row items-start space-x-3 space-y-0">
-								<FormControl>
-									<Switch
-										checked={field.value}
-										onCheckedChange={field.onChange}
-									/>
-								</FormControl>
-								<div className="space-y-1 leading-none">
-									<FormLabel>
-										Purchase Logs
-									</FormLabel>
-								</div>
-							</FormItem>
-						)}
-					/>
-				</div>
-
-				{/* Item Level */}
-				<FormField
-					control={form.control}
-					name="itemLevel"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Item Level</FormLabel>
-							<FormControl>
-								<Input
-									type="number"
-									{...field}
-									onChange={e => field.onChange(Number(e.target.value))}
-								/>
-							</FormControl>
 							<FormMessage />
 						</FormItem>
 					)}

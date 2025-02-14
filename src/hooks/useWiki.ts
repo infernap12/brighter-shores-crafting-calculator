@@ -115,10 +115,12 @@ export function useWikiSingleProfessionMaterials(profession: Profession) {
 
 
 export function useWikiMaterials(professions: Profession[] = DefaultCraftProfessions, passive: boolean = false) {
+	console.log("useWikiMaterials called with professions: ", professions)
 	return useQueries(
 		{
-			queries: professions.map((profession) =>
-				({
+			queries: professions.map((profession) => {
+				console.log("init query multi query - ", profession)
+				return ({
 					queryKey: ['wiki', 'materials', profession],
 					queryFn: async () => {
 						console.log("Starting Fetching materials for profession: ", profession)
@@ -138,7 +140,7 @@ export function useWikiMaterials(professions: Profession[] = DefaultCraftProfess
 						for (const [key, result] of results) {
 
 							const categories: string[] = result.printouts.Category!.map(c => c.fulltext);
-							console.warn("list of categories to search for capes/ bounties and exclude",categories)
+							console.warn("list of categories to search for capes/ bounties and exclude", categories)
 							const disallowedCategories = [
 								"Category:Profession capes",
 								"Category:Pages with bounties",
@@ -155,9 +157,10 @@ export function useWikiMaterials(professions: Profession[] = DefaultCraftProfess
 						console.log("Finished Fetching materials for professions: ", professions)
 						return materials;
 					},
-				})),
+				})
+			}),
 
-			combine: (results) => {
+			/*combine: (results) => {
 				const obj = results.reduce<CombinedResult>(
 					(acc, result, index) => {
 						// Combine all materials into a single Map
@@ -192,13 +195,13 @@ export function useWikiMaterials(professions: Profession[] = DefaultCraftProfess
 					}
 				);
 				return obj;
-			}
+			}*/
 
 		}
 	)
 }
 
-type QueryStatus = {
+/*type QueryStatus = {
 	profession: Profession;
 	isFetching: boolean;
 	isPending: boolean;
@@ -213,7 +216,7 @@ type CombinedResult = {
 	combinedMaterials: Map<string, Material>;
 	queryStatuses: QueryStatus[];
 	isFetching: boolean;
-}
+}*/
 
 
 export function useWikiSingleMaterial(name: string | null) {
