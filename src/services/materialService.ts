@@ -1,6 +1,6 @@
 import {Profession} from "@/profession.ts";
 import {useWikiMaterials, useWikiProducts, useWikiSingleMaterial} from "@/hooks/useWiki.ts";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 
 
 /**
@@ -42,6 +42,14 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 	const discoveryQuery = useWikiSingleMaterial(materialToDiscover);
 	const [lastProfession, setLastProfession] = useState(initialProfession);
 
+	const mats = useMemo(() => {
+		return new Map(allMaterialsQuery?.flatMap((value) => Array.from(value?.data?.entries() || [])) || []);
+	}, [allMaterialsQuery]);
+
+
+	// Combined `isFetching` flag for allMaterialsQuery to check if any query is in a fetching state
+	const allMaterialsFetching = allMaterialsQuery.some(query => query.isFetching);
+
 
 	console.log("Material service called with profession:", initialProfession);
 	console.group("Debug: useMaterialService Hook");
@@ -59,8 +67,8 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 		isError: productsQuery.isError,
 	});
 	console.log("All Materials Query:", {
-		combinedMaterials: allMaterialsQuery.combinedMaterials,
-		isFetching: allMaterialsQuery.isFetching,
+		combinedMaterials: mats,
+		isFetching: allMaterialsQuery[0].isFetching,
 	});
 	console.log("Discovery Query:", {
 		data: discoveryQuery.data,
@@ -79,31 +87,29 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 	}
 
 
-
-
 	console.log("Effect dependencies and their current values:");
 	console.log("productsQuery.data:", productsQuery.data);
-	console.log("allMaterialsQuery.combinedMaterials:", allMaterialsQuery.combinedMaterials);
+	console.log("mats:", mats);
 	console.log("discoveryQuery.data:", discoveryQuery.data);
-	console.log("allMaterialsQuery.isFetching:", allMaterialsQuery.isFetching);
+	console.log("allMaterialsFetching:", allMaterialsFetching);
 	useEffect(() => {
-		console.log("Service entering use effect. Products Data: ", productsQuery.data, " not fetching: ", !allMaterialsQuery.isFetching, "")
-		if (productsQuery.data && !allMaterialsQuery.isFetching) {
-			console.log("Entering use effect. Products Data: ", productsQuery.data, " not fetching: ", !allMaterialsQuery.isFetching, "")
+		console.log("Service entering use effect. Products Data: ", productsQuery.data, " not fetching: ", !allMaterialsFetching, "")
+		if (productsQuery.data && !allMaterialsFetching) {
+			console.log("Entering use effect. Products Data: ", productsQuery.data, " not fetching: ", !allMaterialsFetching, "")
 			// Get missing materials from products AND known materials
 			const missingMaterials = new Set<string>();
 
 			productsQuery.data.forEach(product => {
 				product.recipe.materials.forEach(ingredient => {
-					if (!allMaterialsQuery.combinedMaterials.has(ingredient.materialName)) {
+					if (!mats.has(ingredient.materialName)) {
 						missingMaterials.add(ingredient.materialName);
 					}
 				});
 			});
 			// Then check material recipes (for multistep crafting
-			allMaterialsQuery.combinedMaterials.forEach(material => {
+			mats.forEach(material => {
 				material.recipe?.materials.forEach(ingredient => {
-					if (!allMaterialsQuery.combinedMaterials.has(ingredient.materialName)) {
+					if (!mats.has(ingredient.materialName)) {
 						missingMaterials.add(ingredient.materialName);
 					}
 				});
@@ -124,7 +130,7 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 			if (missingMaterials.size > 0 && !materialToDiscover) {
 				console.log("Starting new discovery for material: ", [...missingMaterials][0])
 				setMaterialToDiscover([...missingMaterials][0]);
-			} else if (!allMaterialsQuery.isFetching && !discoveryQuery.isFetching && !productsQuery.isFetching) {
+			} else if (!allMaterialsFetching && !discoveryQuery.isFetching && !productsQuery.isFetching) {
 				console.log("Service finished loading all linked materials:")
 				setNonReady(false);
 			}
@@ -132,19 +138,23 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 	}, [
 		initialProfession,
 		productsQuery.data,
-		allMaterialsQuery.combinedMaterials,
+		mats,
 		discoveryQuery.data,
-		allMaterialsQuery.isFetching,
+		allMaterialsFetching,
+		productsQuery.isFetching,
+		discoveryQuery.isFetching,
+		materialToDiscover,
+		associatedProfessions
 	]);
 
 	console.log("Service isNonReady above return:", isNonReady);
 	return {
 		associatedProfessions,
 		productsQuery: (isResetting || isNonReady) ? null : productsQuery,
-		allMaterials: (isResetting || isNonReady) ? null : allMaterialsQuery.combinedMaterials,
-		queryStatuses: allMaterialsQuery.queryStatuses,
-		isFetching: allMaterialsQuery.isFetching || discoveryQuery.isFetching || productsQuery.isFetching,
-		isPending: allMaterialsQuery.isPending || discoveryQuery.isPending || productsQuery.isPending,
+		allMaterials: (isResetting || isNonReady) ? null : mats,
+		allMaterialsQuery,
+		isFetching: allMaterialsFetching || discoveryQuery.isFetching || productsQuery.isFetching,
+		isPending: /*allMaterialsQuery.isPending ||*/ discoveryQuery.isPending || productsQuery.isPending,
 		isNonReady,
 		setNonReady
 	};

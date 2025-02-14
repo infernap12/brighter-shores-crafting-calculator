@@ -20,9 +20,9 @@ const urlParams = (query: string, maxlag: number = 5) => {
 
 
 /**
- * Parameters for constructing a wiki query for fetching data.
+ * Parameters for constructing an ask smw query for fetching data.
  *
- * @interface WikiQueryParams
+ * @interface SMWQueryConfig
  * @property {string} [name] - The name of the wiki page to filter results by
  * @property {Array<string>} [categoriesOR] - Categories where at least one is required (OR condition)
  * @property {Array<string>} [categoriesAND] - Categories where all are required (AND condition)
@@ -30,7 +30,7 @@ const urlParams = (query: string, maxlag: number = 5) => {
  * @property {Array<Printrequests>} printRequests - Properties to return in the result for each matched page
  * @property {askParams} askParams - Additional query parameters (limit, offset, sorting, etc.)
  */
-interface WikiQueryParams {
+interface SMWQueryConfig {
 	name?: string;
 	passive?: boolean;
 	categoriesOR?: string[];
@@ -43,7 +43,7 @@ interface WikiQueryParams {
 
 
 export class WikiApi{
-	static buildQuery(params: WikiQueryParams): string {
+	static buildQuery(params: SMWQueryConfig): string {
 		const categoryORConditions = params.categoriesOR?.length
 			? `[[Category:${params.categoriesOR.join("||")}]]`
 			: "";
@@ -78,14 +78,14 @@ export class WikiApi{
 		return `${nameCondition}${passiveCondition}${categoryORConditions}${categoryANDConditions}${professionConditions} ${printRequests}${askParams}`;
 	}
 
-	static async fetchWikiPage(params: WikiQueryParams): Promise<Ask> {
+	static async fetchWikiPage(params: SMWQueryConfig): Promise<Ask> {
 		const query = this.buildQuery(params);
 		const response = await fetch(apiUrl + urlParams(query).toString());
 		return Convert.toAsk(await response.text());
 	}
 
 
-	static async fetchAllPages(params: WikiQueryParams): Promise<Map<string, Result>> {
+	static async fetchAllPages(params: SMWQueryConfig): Promise<Map<string, Result>> {
 		const allResults = new Map<string, Result>();
 
 
@@ -104,29 +104,4 @@ export class WikiApi{
 		return allResults;
 	}
 
-	// export function useWikiWeapons(professions: WeaponProfession[], limit: number = 50, offset: number = 0) {
-	// 	return useQuery({
-	// 		queryKey: ['wiki', 'weapons', professions, limit, offset],
-	// 		queryFn: async () => {
-	// 			const query = `[[Category:Weapons]][[Category:${professions.join("||")}]] |?Category |?Recipe_JSON |?Image |?Description |?Name |?Variant name |?Profession Level A |?Profession Level A High |?Profession A |limit=${limit} |offset${offset} |sort=Profession Level A`
-	// 			const response = await fetch(apiUrl + urlParams(query).toString(), fetchConfig)
-	// 			const askResponse: Ask = Convert.toAsk(await response.text())
-	// 			console.log(askResponse)
-	// 			return new Map(Object.entries(askResponse.query.results))
-	// 		},
-	// 	})
-	// }
-
-	// export function useWikiMaterials(professions: Profession[], limit: number = 500, offset: number = 0) {
-	// 	return useQuery({
-	// 		queryKey: ['wiki', 'materials', professions, limit, offset],
-	// 		queryFn: async () => {
-	// 			const query = `[[Category:Items]][[Profession A::${professions.join("||")}]] |?Category |?Recipe_JSON |?Name |?Description |?Variant name |?Image |?Profession Level A |?Profession Level A High |?-Dropped item.Dropped from.Activity JSON limit=${limit} |offset${offset} |sort=Profession Level A`
-	// 			const response = await fetch(apiUrl + urlParams(query).toString(), fetchConfig)
-	// 			const askResponse: Ask = Convert.toAsk(await response.text())
-	// 			console.log(askResponse)
-	// 			return new Map(Object.entries(askResponse.query.results))
-	// 		},
-	// 	})
-	// }
 }

@@ -58,3 +58,8 @@ export const professionProperties = {
 	[Profession.Stonemason]: {outputCategory: 'Weapons'},
 	[Profession.Leatherworker]: {outputCategory: 'Leather'},
 } as const;
+
+export interface ProfessionSetting {
+	enabled: boolean;
+	level: number;
+}

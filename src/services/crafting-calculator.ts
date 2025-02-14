@@ -1,4 +1,4 @@
-import {Profession} from "@/profession.ts";
+import {Profession, ProfessionSetting} from "@/profession.ts";
 import {Material} from "@/domain/models/material.ts";
 import {Product} from "@/domain/models/product.ts";
 
@@ -7,11 +7,13 @@ interface MaterialBalance {
 	produced: number;    // How much we'll actually make
 	excess: number;      // produced - required
 	batches: number;     // How many craft/gather operations
+	totalCost: number;   // Total cost for all batches
 }
 
 export function calculateCraftingMetrics(
 	weapon: Product,
 	quantity: number,
+	professionSettings: Map<Profession, ProfessionSetting> = new Map(),
 	materials: Map<string, Material>,
 	existingExcess: Map<string, number> = new Map()
 ): CraftingMetrics {
@@ -31,7 +33,39 @@ export function calculateCraftingMetrics(
 
 		if (remainingNeeded === 0) {
 			existingExcess.set(material.name, availableExcess - requiredQuantity);
-			return { required: requiredQuantity, produced: 0, excess: 0, batches: 0 };
+			return { required: requiredQuantity, produced: 0, excess: 0, batches: 0, totalCost: 0 };
+		}
+
+		const professionSetting = professionSettings.get(material.profession);
+		const shouldPurchase =
+			!professionSetting || // Handle undefined professionSetting
+			!professionSetting.enabled || // Profession is disabled
+			(material.level && material.level > (professionSetting?.level || 0)) || // Level requirement not met
+			(!material.recipe && !material.activity); // Material has no crafting/gathering method
+
+		if (shouldPurchase && material.cost && material.value) {
+			const INVENTORY_SLOTS = 24;  // Standard inventory size
+			const MERCHANT_TRIP_DURATION = 0;  // 30 seconds per trip
+
+			const WHATISTHECHARGE = material.profession === Profession.Merchant
+				? (material.level && professionSetting?.level && professionSetting.level >= material.level
+					? material.value
+					: material.cost)
+				: material.cost;
+
+
+			const balance = {
+				required: requiredQuantity,
+				produced: remainingNeeded,
+				excess: availableExcess,
+				batches: 0,
+				totalCost: WHATISTHECHARGE * remainingNeeded
+			};
+
+			// Calculate how many trips to the merchant are needed
+			const tripsToShop = Math.ceil(remainingNeeded / INVENTORY_SLOTS);
+			metrics.totalDuration += tripsToShop * MERCHANT_TRIP_DURATION;
+			return balance;
 		}
 
 		if (material.recipe) {
@@ -41,7 +75,9 @@ export function calculateCraftingMetrics(
 				required: requiredQuantity,
 				produced,
 				excess: produced + availableExcess - requiredQuantity,
-				batches
+				batches,
+				totalCost: 0
+
 			};
 
 			const current = metrics.professionTotals.get(material.profession) || { duration: 0, xp: 0, kp: 0 };
@@ -74,7 +110,8 @@ export function calculateCraftingMetrics(
 				required: requiredQuantity,
 				produced,
 				excess: produced + availableExcess - requiredQuantity,
-				batches
+				batches,
+				totalCost: 0
 			};
 
 			const current = metrics.professionTotals.get(material.profession) || { duration: 0, xp: 0, kp: 0 };
@@ -91,29 +128,7 @@ export function calculateCraftingMetrics(
 			return balance;
 		}
 
-		if (material.cost && material.value) {
-			const batches = remainingNeeded;
-			const produced = batches;
-			const balance = {
-				required: requiredQuantity,
-				produced,
-				excess: produced + availableExcess - requiredQuantity,
-				batches
-			};
-
-			const current = metrics.professionTotals.get(material.profession) || { duration: 0, xp: 0, kp: 0 };
-			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For activity`)
-			metrics.professionTotals.set(material.profession, {
-				duration: current.duration + material.duration * batches,
-				xp: current.xp + material.xp * batches,
-				kp: current.kp + material.kp * batches
-			})
-			metrics.totalDuration += material.duration * batches;
-			metrics.totalXp += material.xp * batches;
-			metrics.totalKp += material.kp * batches;
-
-			return balance;
-		}
+		
 
 		throw new Error(`No recipe or activity found for ${material.name}`);
 	}
@@ -137,6 +152,7 @@ export function calculateCraftingMetrics(
 		const balance = processItem(material, quantity * batches);
 		metrics.materialBalances.set(materialName, balance);
 	}
+	console.log("Finished processing metrics", metrics)
 
 	return metrics;
 }
@@ -162,6 +178,7 @@ function mergeBalance(existing: MaterialBalance | undefined, update: MaterialBal
 		required: existing.required + update.required,
 		produced: existing.produced + update.produced,
 		excess: existing.excess + update.excess,
-		batches: existing.batches + update.batches
+		batches: existing.batches + update.batches,
+		totalCost: existing.totalCost + update.totalCost
 	};
 }

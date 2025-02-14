@@ -2,14 +2,21 @@ import {CraftingMetrics} from "@/services/crafting-calculator.ts";
 import {UserData} from "@/App.tsx";
 import {Avatar, AvatarImage} from "@/components/ui/avatar";
 import {Material} from "@/domain/models/material.ts";
+import {Profession, ProfessionSetting} from "@/profession.ts";
 
-export function MetricsCard({metrics, userData, materials}: {
+export function MetricsCard({metrics, materials}: {
 	metrics: CraftingMetrics,
 	userData: UserData,
-	materials: Map<string, Material>
+	materials: Map<string, Material>,
+	professionSettings: Map<Profession, ProfessionSetting>
 }) {
-	console.log(userData)
-	const showPurchased = userData.isPrimaryPurchased;
+	// Use the costs from the metrics.materialBalances
+	const totalCost = Array.from(metrics.materialBalances.entries())
+		.reduce((sum, [, balance]) => {
+			return sum + (balance.totalCost ?? 0);  // Use totalCost, default to 0 if undefined
+		}, 0);
+
+
 	return (
 		<div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
 			<h3 className="font-semibold mb-4">Crafting Summary</h3>
@@ -26,16 +33,14 @@ export function MetricsCard({metrics, userData, materials}: {
 			</div>
 
 			{/* Material Balances */}
-
-			{/* Material Balances */}
 			<div className="space-y-2">
 				<h4 className="text-sm font-medium">Material Requirements</h4>
 				{Array.from(metrics.materialBalances.entries())
 					.filter((balanceEntry) => balanceEntry[1].required > 0)
 					.map(([name, balance]) => {
 						const material = materials.get(name)!;
-						const time = balance.produced * material.duration
-						return(
+						const time = balance.produced * material.duration;
+						return (
 
 							<div key={material.name} className="grid grid-cols-4 items-center text-sm gap-4">
 								<div className="flex items-center justify-start col-span-2">
@@ -49,13 +54,13 @@ export function MetricsCard({metrics, userData, materials}: {
 									<span>{material.name}</span>
 								</div>
 								<span className="text-center">Craft: {balance.produced.toFixed()}</span>
-								{material.recipe || material.activity ? (
+								{balance.totalCost ? (
 									<span className="text-right">
-										{new Date(time * 1000).toISOString().slice(11, 19) /* Formats as HH:mm:ss */}
+                                    Cost: {(balance.totalCost).toLocaleString()}
 									</span>
 								) : (
 									<span className="text-right">
-										Cost: {((showPurchased ? material.value : material.cost) * balance.produced).toLocaleString()}
+										{new Date(time * 1000).toISOString().slice(11, 19)}
 									</span>
 								)}
 							</div>
@@ -82,7 +87,11 @@ export function MetricsCard({metrics, userData, materials}: {
 					<span>Total KP:</span>
 					<span>{metrics.totalKp.toLocaleString()}</span>
 				</div>
+				<div className="flex justify-between text-sm font-medium">
+					<span>Total Cost:</span>
+					<span>{totalCost.toLocaleString()}</span>
+				</div>
 			</div>
 		</div>
-	);
+	)
 }
