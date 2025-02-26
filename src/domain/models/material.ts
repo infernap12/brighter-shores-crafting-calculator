@@ -18,9 +18,9 @@ export class Material implements Item {
 			this.cost = cost;
 			this.value = value;
 		} else if (activity) {
-			this.xp = activity.xp
-			this.kp = activity.kp
-			this.duration = activity.duration
+			this.xp = activity.xp;
+			this.kp = activity.kp;
+			this.duration = activity.duration;
 			this.profession = activity.profession;
 			this.passive = activity.passive;
 			this.level = activity.level;
@@ -36,11 +36,9 @@ export class Material implements Item {
 			this.level = level;
 			this.cost = cost;
 			this.value = value;
-		}
-
-		else {
-			console.warn("Failed to initialise material: " + name)
-			throw new Error("Failed to initialise material")
+		} else {
+			console.warn("Failed to initialise material: " + name);
+			throw new Error("Failed to initialise material");
 		}
 		this.recipe = recipe;
 		this.activity = activity;
@@ -56,7 +54,6 @@ export class Material implements Item {
 	duration: number;
 	activity: Activity | undefined;
 	recipe: Recipe | undefined;
-
 
 
 }

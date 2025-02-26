@@ -1,11 +1,11 @@
-import { createRoot } from 'react-dom/client'
+import {createRoot} from "react-dom/client";
 import {DevSupport} from "@react-buddy/ide-toolbox";
 import {ComponentPreviews, useInitial} from "@/dev";
-import './index.css'
-import App from './App.tsx'
-import React from 'react';
+import "./index.css";
+import App from "./App.tsx";
+import React from "react";
 import {QueryClient} from "@tanstack/react-query";
-import {PersistQueryClientOptions, PersistQueryClientProvider} from '@tanstack/react-query-persist-client'
+import {PersistQueryClientOptions, PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
 import {createIDBPersister} from "@/services/api/idbPersist.ts";
 
 const queryClient = new QueryClient({
@@ -15,9 +15,9 @@ const queryClient = new QueryClient({
 			staleTime: 1 * 60 * 60 * 1000,
 		},
 	},
-})
+});
 
-const persister = createIDBPersister()
+const persister = createIDBPersister();
 
 // const persister = createSyncStoragePersister({
 // 	storage: window.localStorage,
@@ -29,10 +29,10 @@ const persistClientOptions: PersistQueryClientOptions = {
 	maxAge: Infinity,
 	persister: persister,
 	queryClient: queryClient
-}
+};
 
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
 	<React.StrictMode>
 		<PersistQueryClientProvider client={queryClient} persistOptions={persistClientOptions}>
 			<DevSupport
@@ -43,4 +43,4 @@ createRoot(document.getElementById('root')!).render(
 			</DevSupport>
 		</PersistQueryClientProvider>
 	</React.StrictMode>,
-)
+);

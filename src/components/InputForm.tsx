@@ -11,8 +11,8 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 const formSchema = z.object({
@@ -68,7 +68,7 @@ const formSchema = z.object({
 	{
 		message: "Target XP must be greater than current XP"
 	}
-)
+);
 
 export type InputFormValues = z.infer<typeof formSchema>;
 
@@ -83,7 +83,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 			targetXP: undefined,
 
 		},
-	})
+	});
 
 
 	const currentLevel = form.watch("currentLevel");
@@ -107,27 +107,27 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 
 				if (targetXp <= currentXp) {
 					const newLevel = getLevelForXp(currentXp) + 1;
-					form.resetField("targetLevel", {defaultValue: newLevel})
-					form.resetField("targetXP", {defaultValue: getXpForLevel(newLevel)})
+					form.resetField("targetLevel", {defaultValue: newLevel});
+					form.resetField("targetXP", {defaultValue: getXpForLevel(newLevel)});
 				}
 			}
 
 			// Update current XP/level pair
 			if ((currentLevel !== null && currentXP == null) || form.getFieldState("currentLevel").isDirty) {
 				form.resetField("currentXP", {defaultValue: getXpForLevel(currentLevel!)});
-				form.resetField("currentLevel",{defaultValue: currentLevel})
+				form.resetField("currentLevel", {defaultValue: currentLevel});
 			} else if ((currentXP !== null && currentLevel == null) || form.getFieldState("currentXP").isDirty) {
 				form.resetField("currentLevel", {defaultValue: getLevelForXp(currentXP!)});
-				form.resetField("currentXP", {defaultValue: currentXP})
+				form.resetField("currentXP", {defaultValue: currentXP});
 			}
 
 			// Update target XP/level pair
 			if ((targetLevel !== null && targetXP == null) || form.getFieldState("targetLevel").isDirty) {
 				form.resetField("targetXP", {defaultValue: getXpForLevel(targetLevel!)});
-				form.resetField("targetLevel",{defaultValue: targetLevel})
+				form.resetField("targetLevel", {defaultValue: targetLevel});
 			} else if ((targetXP !== null && targetLevel == null) || form.getFieldState("targetXP").isDirty) {
 				form.resetField("targetLevel", {defaultValue: getLevelForXp(targetXP!)});
-				form.resetField("targetXP", {defaultValue: targetXP})
+				form.resetField("targetXP", {defaultValue: targetXP});
 			}
 
 
@@ -148,7 +148,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 				<FormField
 					control={form.control}
 					name="profession"
-					render={({ field }) => (
+					render={({field}) => (
 						<FormItem>
 							<FormLabel>Profession</FormLabel>
 							<Select
@@ -157,7 +157,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 							>
 								<FormControl>
 									<SelectTrigger>
-										<SelectValue placeholder="Select a profession" />
+										<SelectValue placeholder="Select a profession"/>
 									</SelectTrigger>
 								</FormControl>
 								<SelectContent>
@@ -168,7 +168,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 									))}
 								</SelectContent>
 							</Select>
-							<FormMessage />
+							<FormMessage/>
 						</FormItem>
 					)}
 				/>
@@ -179,7 +179,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 						<FormField
 							control={form.control}
 							name="currentLevel"
-							render={({ field }) => (
+							render={({field}) => (
 								<FormItem>
 									<FormLabel>Current Level</FormLabel>
 									<FormControl>
@@ -189,11 +189,11 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 											value={field.value ?? 0}
 											onChange={e => {
 												// void form.trigger()
-												return field.onChange(Number(e.target.value) || 0)
+												return field.onChange(Number(e.target.value) || 0);
 											}}
 										/>
 									</FormControl>
-									<FormMessage />
+									<FormMessage/>
 								</FormItem>
 							)}
 						/>
@@ -201,18 +201,18 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 						<FormField
 							control={form.control}
 							name="currentXP"
-							render={({ field }) => (
+							render={({field}) => (
 								<FormItem>
 									<FormLabel>Current XP</FormLabel>
 									<FormControl>
 										<Input
 											type="number"
 											{...field}
-											value={field.value ?? ''}
+											value={field.value ?? ""}
 											onChange={e => field.onChange(e.target.value ? Number(e.target.value) : null)}
 										/>
 									</FormControl>
-									<FormMessage />
+									<FormMessage/>
 								</FormItem>
 							)}
 						/>
@@ -222,18 +222,18 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 						<FormField
 							control={form.control}
 							name="targetLevel"
-							render={({ field }) => (
+							render={({field}) => (
 								<FormItem>
 									<FormLabel>Target Level</FormLabel>
 									<FormControl>
 										<Input
 											type="number"
 											{...field}
-											value={field.value ?? ''}
+											value={field.value ?? ""}
 											onChange={e => field.onChange(e.target.value ? Number(e.target.value) : null)}
 										/>
 									</FormControl>
-									<FormMessage />
+									<FormMessage/>
 								</FormItem>
 							)}
 						/>
@@ -241,18 +241,18 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 						<FormField
 							control={form.control}
 							name="targetXP"
-							render={({ field }) => (
+							render={({field}) => (
 								<FormItem>
 									<FormLabel>Target XP</FormLabel>
 									<FormControl>
 										<Input
 											type="number"
 											{...field}
-											value={field.value ?? ''}
+											value={field.value ?? ""}
 											onChange={e => field.onChange(e.target.value ? Number(e.target.value) : null)}
 										/>
 									</FormControl>
-									<FormMessage />
+									<FormMessage/>
 								</FormItem>
 							)}
 						/>

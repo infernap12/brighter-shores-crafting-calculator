@@ -33,7 +33,7 @@ export function calculateCraftingMetrics(
 
 		if (remainingNeeded === 0) {
 			existingExcess.set(material.name, availableExcess - requiredQuantity);
-			return { required: requiredQuantity, produced: 0, excess: 0, batches: 0, totalCost: 0 };
+			return {required: requiredQuantity, produced: 0, excess: 0, batches: 0, totalCost: 0};
 		}
 
 		const professionSetting = professionSettings.get(material.profession);
@@ -80,8 +80,8 @@ export function calculateCraftingMetrics(
 
 			};
 
-			const current = metrics.professionTotals.get(material.profession) || { duration: 0, xp: 0, kp: 0 };
-			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For recipe`)
+			const current = metrics.professionTotals.get(material.profession) || {duration: 0, xp: 0, kp: 0};
+			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For recipe`);
 			metrics.professionTotals.set(material.profession, {
 				duration: current.duration + material.duration * batches,
 				xp: current.xp + material.xp * batches,
@@ -114,8 +114,8 @@ export function calculateCraftingMetrics(
 				totalCost: 0
 			};
 
-			const current = metrics.professionTotals.get(material.profession) || { duration: 0, xp: 0, kp: 0 };
-			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For activity`)
+			const current = metrics.professionTotals.get(material.profession) || {duration: 0, xp: 0, kp: 0};
+			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For activity`);
 			metrics.professionTotals.set(material.profession, {
 				duration: current.duration + material.duration * batches,
 				xp: current.xp + material.xp * batches,
@@ -128,14 +128,13 @@ export function calculateCraftingMetrics(
 			return balance;
 		}
 
-		
 
 		throw new Error(`No recipe or activity found for ${material.name}`);
 	}
 
 	// Handle initial weapon
 	const batches = Math.ceil(quantity / weapon.recipe.outputQuantity);
-	const profMetrics = metrics.professionTotals.get(weapon.profession) || { duration: 0, xp: 0, kp: 0 };
+	const profMetrics = metrics.professionTotals.get(weapon.profession) || {duration: 0, xp: 0, kp: 0};
 	profMetrics.duration += weapon.duration * batches;
 	profMetrics.xp += weapon.xp * batches;
 	profMetrics.kp += weapon.kp * batches;
@@ -143,7 +142,7 @@ export function calculateCraftingMetrics(
 	metrics.totalDuration += weapon.duration * batches;
 	metrics.totalXp += weapon.xp * batches;
 	metrics.totalKp += weapon.kp * batches;
-	console.log(`Kp: ${weapon.kp} Name: ${weapon.name} Profession: ${weapon.profession} For weapon`)
+	console.log(`Kp: ${weapon.kp} Name: ${weapon.name} Profession: ${weapon.profession} For weapon`);
 
 	// Process weapon materials
 	for (const {materialName, quantity} of weapon.recipe.materials) {
@@ -152,7 +151,7 @@ export function calculateCraftingMetrics(
 		const balance = processItem(material, quantity * batches);
 		metrics.materialBalances.set(materialName, balance);
 	}
-	console.log("Finished processing metrics", metrics)
+	console.log("Finished processing metrics", metrics);
 
 	return metrics;
 }

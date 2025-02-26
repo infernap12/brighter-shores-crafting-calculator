@@ -1,4 +1,3 @@
-
 import {useEffect} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {ceil} from "@/lib/utils.ts";
@@ -49,17 +48,20 @@ export function DataTableContainer({weapons, filters, calculationInputs, onSelec
 		/>
 	);
 }
-function WeaponTable({
-	weapons,
-	calculationInputs,
-	onSelectWeapon,
-	isNonReady,
-}:{
-	weapons: Product[];
-	calculationInputs: XPCalculationInputs;
-	onSelectWeapon: (weapon: Product) => void;
-	isNonReady: boolean;
-}) {
+
+function WeaponTable(
+	{
+		weapons,
+		calculationInputs,
+		onSelectWeapon,
+		isNonReady,
+	}: {
+		weapons: Product[];
+		calculationInputs: XPCalculationInputs;
+		onSelectWeapon: (weapon: Product) => void;
+		isNonReady: boolean;
+	}
+) {
 
 	const weaponXp = useWeaponXPCalculations(weapons, calculationInputs, isNonReady);
 

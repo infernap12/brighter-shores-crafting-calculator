@@ -3,7 +3,7 @@ import {Profession} from "@/profession.ts";
 import {Ask, askParams, Convert, Printrequests, Result} from "@/services/api/askApi.ts";
 
 
-const apiUrl = "https://brightershoreswiki.org/api.php?"
+const apiUrl = "https://brightershoreswiki.org/api.php?";
 // const userAgent = 'Brighter Shores Weapon calc v0.1-dev (github.com/infernap12/brighter-shores-weapon-calculator); ([[User:Infernap12]])';
 
 // const fetchConfig = {
@@ -15,7 +15,7 @@ const apiUrl = "https://brightershoreswiki.org/api.php?"
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const urlParams = (query: string, maxlag: number = 5) => {
-	return new URLSearchParams({action: 'ask', query: query, format: 'json', maxlag: maxlag.toString()})
+	return new URLSearchParams({action: "ask", query: query, format: "json", maxlag: maxlag.toString()});
 };
 
 
@@ -41,8 +41,7 @@ interface SMWQueryConfig {
 }
 
 
-
-export class WikiApi{
+export class WikiApi {
 	static buildQuery(params: SMWQueryConfig): string {
 		const categoryORConditions = params.categoriesOR?.length
 			? `[[Category:${params.categoriesOR.join("||")}]]`

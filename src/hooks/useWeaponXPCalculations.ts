@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
-import { Material } from '@/domain/models/material.ts';
-import {resolveTotalXp} from '@/domain/services/calculatorService.ts';
+import {useMemo} from "react";
+import {Material} from "@/domain/models/material.ts";
+import {resolveTotalXp} from "@/domain/services/calculatorService.ts";
 import {Product} from "@/domain/models/product.ts";
 
 export interface XPCalculationInputs {

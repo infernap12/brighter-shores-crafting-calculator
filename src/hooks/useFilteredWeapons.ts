@@ -1,7 +1,7 @@
 // hooks/useFilteredWeapons.ts
-import { useMemo } from 'react';
-import { Product } from '@/domain/models/product.ts';
-import { Profession } from '@/profession.ts';
+import {useMemo} from "react";
+import {Product} from "@/domain/models/product.ts";
+import {Profession} from "@/profession.ts";
 
 export interface WeaponFilters {
 	profession: Profession;

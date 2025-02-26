@@ -3,6 +3,7 @@
 //   import { Convert, Ask } from "./file";
 //
 //   const ask = Convert.toAsk(json);
+// noinspection IncorrectFormatting
 
 export interface Ask {
 	"query-continue-offset"?: number;

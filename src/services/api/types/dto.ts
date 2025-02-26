@@ -1,6 +1,3 @@
-
-
-
 export interface RecipeDto {
 	kp?: number,
 	xp?: number,

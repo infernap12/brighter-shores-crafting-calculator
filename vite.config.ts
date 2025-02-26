@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [react()],
-	base: "brighter-shores-weapon-calculator/",
+	// base: "/brighter-shores-crafting-calculator/",
 	resolve: {
 		alias: {
 			'@': '/src',
@@ -12,5 +12,6 @@ export default defineConfig({
 	},
 	test: {
 		globals: true,
-	}
+	},
+	assetsInclude: ['**/*.png'],
 })
