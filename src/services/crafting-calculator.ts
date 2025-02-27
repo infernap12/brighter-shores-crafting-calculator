@@ -11,8 +11,8 @@ interface MaterialBalance {
 }
 
 export function calculateCraftingMetrics(
-	weapon: Product,
-	quantity: number,
+	product: Product,
+	productQuantityNeeded: number,
 	professionSettings: Map<Profession, ProfessionSetting> = new Map(),
 	materials: Map<string, Material>,
 	existingExcess: Map<string, number> = new Map()
@@ -43,10 +43,20 @@ export function calculateCraftingMetrics(
 			(material.level && material.level > (professionSetting?.level || 0)) || // Level requirement not met
 			(!material.recipe && !material.activity); // Material has no crafting/gathering method
 
-		if (shouldPurchase && material.cost && material.value) {
+		console.group(`should purchase ${material.name}?`);
+		console.log("shouldPurchase", shouldPurchase);
+		console.log("professionSetting", professionSetting);
+		console.log("material", material);
+		console.groupEnd();
+
+
+		if (shouldPurchase && material.cost) {
 			const INVENTORY_SLOTS = 24;  // Standard inventory size
 			const MERCHANT_TRIP_DURATION = 0;  // 30 seconds per trip
 
+			console.log("mat  prof is merchant", material.profession === Profession.Merchant);
+			console.log(`mat ${material.name} level is`, material.level, "prof level is", professionSetting?.level);
+			console.log("mat cost is", material.cost, "mat value is", material.value);
 			const WHATISTHECHARGE = material.profession === Profession.Merchant
 				? (material.level && professionSetting?.level && professionSetting.level >= material.level
 					? material.value
@@ -83,7 +93,7 @@ export function calculateCraftingMetrics(
 			const current = metrics.professionTotals.get(material.profession) || {duration: 0, xp: 0, kp: 0};
 			console.log(`Kp: ${material.kp} Name: ${material.name} Profession: ${material.profession} For recipe`);
 			metrics.professionTotals.set(material.profession, {
-				duration: current.duration + material.duration * batches,
+				duration: current.duration + (material.duration * batches),
 				xp: current.xp + material.xp * batches,
 				kp: current.kp + material.kp * batches
 			});
@@ -132,25 +142,30 @@ export function calculateCraftingMetrics(
 		throw new Error(`No recipe or activity found for ${material.name}`);
 	}
 
-	// Handle initial weapon
-	const batches = Math.ceil(quantity / weapon.recipe.outputQuantity);
-	const profMetrics = metrics.professionTotals.get(weapon.profession) || {duration: 0, xp: 0, kp: 0};
-	profMetrics.duration += weapon.duration * batches;
-	profMetrics.xp += weapon.xp * batches;
-	profMetrics.kp += weapon.kp * batches;
-	metrics.professionTotals.set(weapon.profession, profMetrics);
-	metrics.totalDuration += weapon.duration * batches;
-	metrics.totalXp += weapon.xp * batches;
-	metrics.totalKp += weapon.kp * batches;
-	console.log(`Kp: ${weapon.kp} Name: ${weapon.name} Profession: ${weapon.profession} For weapon`);
+	processItem(Material.fromProduct(product), productQuantityNeeded);
 
-	// Process weapon materials
-	for (const {materialName, quantity} of weapon.recipe.materials) {
+
+	// Handle initial product
+	/*const profMetrics = metrics.professionTotals.get(product.profession) || {duration: 0, xp: 0, kp: 0};
+	profMetrics.duration += product.duration * productQuantityNeeded;
+	profMetrics.xp += product.xp * productQuantityNeeded;
+	profMetrics.kp += product.kp * productQuantityNeeded;
+	metrics.professionTotals.set(product.profession, profMetrics);
+	console.log("product duration", product.duration, "batches", productQuantityNeeded);
+	metrics.totalDuration += product.duration * productQuantityNeeded;
+	metrics.totalXp += product.xp * productQuantityNeeded;
+	metrics.totalKp += product.kp * productQuantityNeeded;
+	console.log(`Kp: ${product.kp} Name: ${product.name} Profession: ${product.profession} For product`);*/
+
+	// Process product materials
+	/*for (const {materialName, quantity} of product.recipe.materials) {
 		const material = materials.get(materialName);
 		if (!material) throw new Error(`Missing material: ${materialName}`);
-		const balance = processItem(material, quantity * batches);
+		const crafts = productQuantityNeeded / product.recipe.outputQuantity;
+		const needed = crafts * quantity;
+		const balance = processItem(material, needed);
 		metrics.materialBalances.set(materialName, balance);
-	}
+	}*/
 	console.log("Finished processing metrics", metrics);
 
 	return metrics;

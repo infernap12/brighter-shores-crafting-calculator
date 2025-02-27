@@ -1,6 +1,6 @@
 export interface Item {
 	name: string;
-	variant: string;
+	variantName: string;
 	fullName: string;
 	description: string;
 	imageUrl: string;

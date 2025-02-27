@@ -5,7 +5,8 @@ import App from "@/App.tsx";
  import {Weapon} from "@/domain/models/weapon.ts";
  import {Recipe} from "@/domain/models/recipe.ts";
  import {Faction, Profession} from "@/profession.ts";*/
-import {DataTableSkeleton, InputFormSkeleton, WeaponCardSkeleton} from "@/components/skeleton-loaders.tsx";
+import {DataTableSkeleton, InputFormSkeleton, ItemCardSkeleton} from "@/components/skeleton-loaders.tsx";
+import {Time} from "@/components/time.tsx";
 
 /*const imageUrl = "src/assets/react.svg"
  const recipe = new Recipe("DemoRecipe", 1,
@@ -27,13 +28,16 @@ const ComponentPreviews = () => {
 				<ComponentPreviews/>
 			</ComponentPreview>
 			<ComponentPreview path="/WeaponCardSkeleton">
-				<WeaponCardSkeleton/>
+				<ItemCardSkeleton/>
 			</ComponentPreview>
 			<ComponentPreview path="/InputFormSkeleton">
 				<InputFormSkeleton/>
 			</ComponentPreview>
 			<ComponentPreview path="/DataTableSkeleton">
 				<DataTableSkeleton/>
+			</ComponentPreview>
+			<ComponentPreview path="/Time">
+				<Time seconds={86999}/>
 			</ComponentPreview>
 		</Previews>
 	);
