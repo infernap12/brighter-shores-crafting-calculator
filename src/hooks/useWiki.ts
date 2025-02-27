@@ -7,6 +7,8 @@ import {Product} from "@/domain/models/product.ts";
 import {WikiMapper} from "@/domain/services/wikiMapper.ts";
 import {Material} from "@/domain/models/material.ts";
 import {WikiApi} from "@/services/api/wikiApi.ts";
+import {ActivityDto} from "@/services/api/types/dto.ts";
+import {Activity} from "@/domain/models/activity.ts";
 
 const DefaultCraftProfessions = [
 	Profession.Blacksmith,
@@ -18,13 +20,14 @@ const DefaultCraftProfessions = [
 	Profession.Carpenter,
 ];
 
-const WEAPONS_PRINTREQUESTS: Printrequests[] = [
+const PRODUCTS_PRINTREQUESTS: Printrequests[] = [
 	"Category",
 	"Recipe JSON",
 	"Image",
 	"Description",
 	"Name",
 	"Variant name",
+	"Variant of",
 	"Profession Level A",
 	"Profession Level A High",
 	"Profession A",
@@ -37,23 +40,22 @@ const MATERIALS_PRINTREQUESTS: Printrequests[] = [
 	"Description",
 	"Name",
 	"Variant name",
+	"Variant of",
 	"Passive",
 	"Profession A",
 	"Profession Level A",
 	"Profession Level A High",
-	"-Dropped item.Dropped from.Activity JSON=Activity JSON",
 	"-Sold item.Shop buy price=Shop buy price",
 	"-Sold item.Shop sell price=Shop sell price",
 ];
 
-
 export function useWikiProducts(profession: Profession = Profession.Stonemason, passive: boolean) {
-	const craftType = professionProperties[profession].outputCategory;
-	console.log("useWikiWeapons called with professions: ", profession);
+	const craftType = passive ? "Pages with recipes" : professionProperties[profession].outputCategory;
+	console.log("useWikiProducts called with professions: ", profession);
 	return useQuery({
-		queryKey: ["wiki", "products", craftType, profession],
+		queryKey: ["wiki", "products", craftType, profession, passive],
 		queryFn: async () => {
-			console.log("Starting Fetching weapons for professions: ", profession);
+			console.log("Starting Fetching products for profession: ", profession);
 			const results = await WikiApi.fetchAllPages({
 				askParams: {
 					limit: 50,
@@ -62,55 +64,46 @@ export function useWikiProducts(profession: Profession = Profession.Stonemason, 
 				categoriesAND: [craftType],
 				categoriesOR: [profession],
 				passive,
-				printRequests: WEAPONS_PRINTREQUESTS,
+				printRequests: PRODUCTS_PRINTREQUESTS,
 			});
 
-			const weapons = new Map<string, Product>();
+			const products = new Map<string, Product>();
 			for (const [key, result] of results) {
-				const weapon = WikiMapper.toWeapon(result);
-				if (weapon) {
-					weapons.set(key, weapon);
+				const product = WikiMapper.toProduct(result);
+				if (product) {
+					products.set(key, product);
 				}
 			}
-			console.log("Finished Fetching weapons/products for profession: ", profession);
-			return weapons;
+			console.log("Finished Fetching products for profession: ", profession);
+			return products;
 		},
 	});
 }
 
-
-export function useWikiSingleProfessionMaterials(profession: Profession) {
+export function useContainers() {
 	return useQuery({
-		queryKey: ["wiki", "materials", profession],
+		queryKey: ["wiki", "materials", "containers"],
 		queryFn: async () => {
 			const results = await WikiApi.fetchAllPages({
-				professionA: [profession],
-				categoriesOR: ["Items"],
+				categoriesOR: ["containers"],
+				passive: true,
 				printRequests: MATERIALS_PRINTREQUESTS,
 				askParams: {
-					limit: 500,
-					sort: ["Profession Level A"]
+					limit: 10
 				}
 			});
 
 			const materials = new Map<string, Material>();
 			for (const [key, result] of results) {
-
-				const categories: string[] = result.printouts.Category!.map(c => c.fulltext);
-				console.warn("list of categories to search for capes/ bounties and exclude", categories);
-				if (categories.includes("Category:Profession capes") || categories.includes("Category:Pages with bounties")) {
-					continue;
-				}
 				const material = WikiMapper.toMaterial(result);
 				if (material) {  // Only add valid materials
 					materials.set(key, material);
 				}
 			}
-			console.log("Finished Fetching materials for profession: ", profession);
+			console.log("Finished Fetching containers: ", materials);
 			return materials;
 		}
 	});
-
 }
 
 
@@ -118,105 +111,83 @@ export function useWikiMaterials(professions: Profession[] = DefaultCraftProfess
 	console.log("useWikiMaterials called with professions: ", professions);
 	return useQueries(
 		{
-			queries: professions.map((profession) => {
-				console.log("init query multi query - ", profession);
-				return ({
-					queryKey: ["wiki", "materials", profession],
-					queryFn: async () => {
-						console.log("Starting Fetching materials for profession: ", profession);
+			queries: [
+				...professions.map((profession) => {
+					console.log("init query multi query - ", profession);
+					return ({
+						queryKey: ["wiki", "materials", profession, passive],
+						queryFn: async () => {
+							console.log("Starting Fetching materials for profession: ", profession);
+							const results = await WikiApi.fetchAllPages({
+								professionA: [profession],
+								categoriesOR: ["Items"],
+								passive,
+								printRequests: MATERIALS_PRINTREQUESTS,
+								askParams: {
+									limit: 50,
+								}
+							});
+							console.log("results for ", results);
 
-						const results = await WikiApi.fetchAllPages({
-							professionA: [profession],
-							categoriesOR: ["Items"],
-							passive,
-							printRequests: MATERIALS_PRINTREQUESTS,
-							askParams: {
-								limit: 500,
-								sort: ["Profession Level A"]
+
+							const skillNodeResults = await WikiApi.fetchAllPages({
+								professionA: [profession],
+								categoriesOR: ["Skill nodes"],
+								printRequests: [
+									"Activity JSON",
+									"Variant of.Action per hour banking=Action per hour banking",
+								],
+								askParams: {
+									limit: 10,
+								}
+
+							});
+
+
+							console.log("nodes", skillNodeResults);
+
+							const activities: Activity[] = Array.from(skillNodeResults.entries()).flatMap(([, node]) => {
+								const activityJsonStrings: string[] = node.printouts["Activity JSON"] ?? [];
+								return activityJsonStrings
+									.map(activityJson => {
+										const parsedDto = JSON.parse(activityJson) as ActivityDto;
+										const activity = Activity.fromDto(parsedDto);
+										if (Array.isArray(node.printouts["Action per hour banking"]) && Number.isInteger(node.printouts["Action per hour banking"]?.[0])) {
+											activity.duration = 3600 / node.printouts["Action per hour banking"][0];
+										}
+										return activity;
+									})
+									.filter(act => act.passive === passive && !act.coop);
+							});
+
+							console.log("activities", activities);
+
+							const materials = new Map<string, Material>();
+							for (const [key, result] of results) {
+
+								const categories: string[] = result.printouts.Category!.map(c => c.fulltext);
+								console.warn("list of categories to search for capes/ bounties and exclude", categories);
+								const disallowedCategories = [
+									"Category:Profession capes",
+									"Category:Pages with bounties",
+									"Category:Equipment",
+								];
+								if (categories.some(category => disallowedCategories.includes(category))) {
+									continue;
+								}
+								const material = WikiMapper.toMaterial(result, activities);
+								if (material) {  // Only add valid materials
+									materials.set(key, material);
+								}
 							}
-						});
-
-						const materials = new Map<string, Material>();
-						for (const [key, result] of results) {
-
-							const categories: string[] = result.printouts.Category!.map(c => c.fulltext);
-							console.warn("list of categories to search for capes/ bounties and exclude", categories);
-							const disallowedCategories = [
-								"Category:Profession capes",
-								"Category:Pages with bounties",
-								"Category:Equipment",
-							];
-							if (categories.some(category => disallowedCategories.includes(category))) {
-								continue;
-							}
-							const material = WikiMapper.toMaterial(result);
-							if (material) {  // Only add valid materials
-								materials.set(key, material);
-							}
-						}
-						console.log("Finished Fetching materials for professions: ", professions);
-						return materials;
-					},
-				});
-			}),
-
-			/*combine: (results) => {
-			 const obj = results.reduce<CombinedResult>(
-			 (acc, result, index) => {
-			 // Combine all materials into a single Map
-			 if (result.data) {
-			 result.data.forEach((value, key) => {
-			 acc.combinedMaterials.set(key, value);
-			 });
-			 }
-
-			 // Add status information for each individual query
-			 acc.queryStatuses.push({
-			 profession: professions[index],
-			 isFetching: result.isFetching,
-			 isPending: result.isPending,
-			 isLoading: result.isLoading,
-			 isError: result.isError,
-			 error: result.error,
-			 data: result.data,
-			 });
-			 // Update global isFetching if any query is fetching
-			 acc.isFetching = acc.isFetching || result.isFetching;
-			 acc.isPending = acc.isPending || result.isPending;
-
-
-			 return acc;
-			 },
-			 {
-			 combinedMaterials: new Map<string, Material>(),
-			 queryStatuses: [],
-			 isFetching: false,
-			 isPending: false
-			 }
-			 );
-			 return obj;
-			 }*/
-
+							console.log("Finished Fetching materials for professions: ", professions);
+							return materials;
+						},
+					});
+				})],
 		}
-	);
+	)
 }
-
-/*type QueryStatus = {
- profession: Profession;
- isFetching: boolean;
- isPending: boolean;
- isLoading: boolean;
- isError: boolean;
- error: Error | null;
- data: Map<string, Material> | undefined;
- }
-
- type CombinedResult = {
- isPending: boolean;
- combinedMaterials: Map<string, Material>;
- queryStatuses: QueryStatus[];
- isFetching: boolean;
- }*/
 
 
 export function useWikiSingleMaterial(name: string | null) {
@@ -226,7 +197,7 @@ export function useWikiSingleMaterial(name: string | null) {
 			if (!name) {
 				return null;
 			}
-			console.log(`Fetching material with name: ${name}`);
+			console.log(`Fetching single material with name: ${name}`);
 			const results = await WikiApi.fetchAllPages({
 				name: name,
 				categoriesOR: ["Items"],
@@ -235,15 +206,17 @@ export function useWikiSingleMaterial(name: string | null) {
 					limit: 1,
 				}
 			});
+			console.log(`Single material results: `, results);
 			// Assuming there will be only one result for the given name
 			const [[, result]] = results;
 			const material = WikiMapper.toMaterial(result);
+			console.log(`Single material: `, material);
 
 			if (!material) {
-				throw new Error(`Material with name "${name}" not found`);
+				throw new Error(`Single Material with name "${name}" not found`);
 			}
 
-			console.log(`Fetched material: `, material);
+			console.log(`Fetched single material: `, material);
 			return material;
 		},
 	});

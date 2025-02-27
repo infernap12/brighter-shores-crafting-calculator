@@ -8,14 +8,14 @@ export interface XPCalculationInputs {
 	neededXp: number;
 }
 
-export function useWeaponXPCalculations(weapons: Product[], calculationInputs: XPCalculationInputs, isNonReady: boolean) {
+export function useProductXPCalculations(products: Product[], calculationInputs: XPCalculationInputs, isNonReady: boolean) {
 	return useMemo(() => {
-		if (isNonReady) return new Map();
+		if (isNonReady) return new Map<string, number>();
 		return new Map(
-			weapons.map((weapon) => [
-				weapon.fullName,
-				resolveTotalXp(weapon, calculationInputs.materials)
+			products.map((product) => [
+				product.fullName,
+				resolveTotalXp(product, calculationInputs.materials)
 			])
 		);
-	}, [weapons, calculationInputs.materials, isNonReady]);
+	}, [products, calculationInputs.materials, isNonReady]);
 }

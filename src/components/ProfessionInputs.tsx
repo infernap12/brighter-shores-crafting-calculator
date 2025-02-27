@@ -13,32 +13,52 @@ import {Input} from "@/components/ui/input";
 interface AssociatedProfessionsFormProps {
 	associatedProfessions: Profession[];
 	onChange: (settings: Map<Profession, ProfessionSetting>) => void;
+	initialSettings: Map<Profession, ProfessionSetting>;
 }
 
 
-export function AssociatedProfessionsForm({associatedProfessions, onChange}: AssociatedProfessionsFormProps) {
-	const defaultSettings = new Map(
-		associatedProfessions.map(profession => [
-			profession,
-			{enabled: false, level: 1}
-		])
-	);
+export function AssociatedProfessionsForm(
+	{
+		associatedProfessions,
+		onChange,
+		initialSettings
+	}: AssociatedProfessionsFormProps
+) {
+	const defaultSettings = new Map<Profession, ProfessionSetting>();
+
+
+	initialSettings.forEach((setting, profession) => {
+		defaultSettings.set(profession, setting);
+	});
+	
+	associatedProfessions.forEach(profession => {
+		const existingSetting = defaultSettings.get(profession);
+		defaultSettings.set(profession, existingSetting || {enabled: false, level: 1});
+	})
 
 	const form = useForm({
 		defaultValues: {
-			settings: Object.fromEntries(defaultSettings)
+			settings: Object.fromEntries(defaultSettings) as Record<Profession, ProfessionSetting>
 		}
 	});
 
 	const handleChange = () => {
 		const formValues = form.getValues().settings;
 		// Convert back to Map when sending to parent
-		const settingsMap = new Map(
-			Object.entries(formValues).map(([key, value]) => [
-				key as Profession,
-				value as ProfessionSetting
-			])
-		);
+		const settingsMap = new Map<Profession, ProfessionSetting>();
+
+
+		initialSettings.forEach((setting, profession) => {
+			settingsMap.set(profession, setting);
+		})
+
+		Object.entries(formValues).forEach(([profession, setting]) => {
+			settingsMap.set(
+				profession as Profession,
+				setting
+			);
+		})
+
 		onChange(settingsMap);
 	};
 
