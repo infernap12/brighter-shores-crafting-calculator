@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500" viewBox="12.5 12.5 475 475">
+	<defs>
+		<!-- X shape -->
+		<path id="x-shape" d="M220,220 L280,280 M220,280 L280,220" stroke-width="45" stroke-linecap="square"/>
+		<path id="x-shape-big" d="M220,220 L280,280 M220,280 L280,220" stroke-width="75" stroke-linecap="square"/>
+
+		<clipPath id="mebe">
+			<circle cx="250" cy="250" r="20"/>
+			<use href="#x-shape-big"/>
+		</clipPath>
+
+		<linearGradient id="innerGradient" gradientTransform="rotate(35, 0.5, 0.5)">
+			<stop offset="35%" stop-color="#94bcc3"/>
+			<stop offset="50%" stop-color="#cee9ef"/>
+			<stop offset="65%" stop-color="#94bcc3"/>
+		</linearGradient>
+
+		<linearGradient id="outerGradient" gradientTransform="rotate(35, 0.5, 0.5)">
+			<stop offset="35%" stop-color="#ADDFE6"/>
+			<stop offset="50%" stop-color="#EFFFFF"/>
+			<stop offset="65%" stop-color="#ADDFE6"/>
+		</linearGradient>
+
+		<filter id="innerShadow">
+			<feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+			<feOffset dx="0" dy="1"/>
+			<feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/>
+			<feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0"/>
+		</filter>
+
+		<!-- Outer rim gradient -->
+		<radialGradient id="ai-out" cx="40%" cy="40%" r="60%">
+			<stop offset="0%" stop-color="#c0e8f0"/>
+			<stop offset="100%" stop-color="#80c0d0"/>
+		</radialGradient>
+
+		<!-- Inner face gradient -->
+		<radialGradient id="ai-in" cx="30%" cy="30%" r="70%">
+			<stop offset="0%" stop-color="#b0e0e8"/>
+			<stop offset="100%" stop-color="#70b0c0"/>
+		</radialGradient>
+
+
+		<!-- mask for cut -->
+		<mask id="x-cutout-mask">
+			<rect width="500" height="500" x="0" y="0" fill="white"/>
+			<use href="#x-shape" stroke="black"/>
+		</mask>
+		<!-- mask for outline -->
+		<mask id="x-outline-mask">
+			<rect width="500" height="500" fill="black"/>
+			<use href="#x-shape-big" stroke="white"/>
+			<use href="#x-shape" stroke="black"/>
+		</mask>
+	</defs>
+
+	<!-- rim -->
+	<circle cx="250" cy="250" r="230" fill="url(#outerGradient)" stroke="#333333" stroke-width="10" mask="url(#x-cutout-mask)"/>
+	<!-- inside -->
+	<circle cx="250" cy="250" r="200" fill="url(#innerGradient)" stroke="#666666" stroke-width="2" mask="url(#x-cutout-mask)"/>
+	<!-- shadow -->
+<!--	<circle cx="250" cy="250" r="200" fill="transparent" filter="url(#innerShadow)" stroke="#a0a0a0" stroke-width="1"/>-->
+
+	<rect width="500" height="500" fill="black" mask="url(#x-outline-mask)"/>
+
+
+
+
+<!--	 Pickaxe using simplified version of the shared design-->
+<!--	 <g transform="translate(60,30) scale(0.80) rotate(-10,200,200)">-->
+<!--	  <path fill="#8C4C4C" d="m380.943,85.507l-371.574,371.575c-12.492,12.492 -12.492,32.729 0,45.221c12.492,12.492 32.729,12.492 45.221,0l371.574,-371.574l-45.221,-45.222z"/>-->
+<!--	  <path fill="#ff8b1e" d="m511.672,391.952c0,0 -97.531,-128.574 -180.463,-211.49c-82.931,-82.931 -211.504,-180.462 -211.504,-180.462s136.006,0.328 263.83,128.136c127.809,127.809 128.137,263.816 128.137,263.816z"/>-->
+<!--	  <rect fill="#fcb102" height="138.569" width="63.951" transform="matrix(-0.7071, -0.7071, 0.7071, -0.7071, 494.192, 518.903)" y="87.817" x="322.589"/>-->
+<!--	  <path fill="#434A54" d="m365.859,160.881c-4.154,4.169 -10.915,4.154 -15.068,0c-4.17,-4.169 -4.17,-10.915 0,-15.084c4.153,-4.153 10.914,-4.153 15.068,0c4.17,4.169 4.17,10.915 0,15.084z"/>-->
+<!--	 </g>-->
+</svg>
