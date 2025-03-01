@@ -5,8 +5,9 @@ import {Material} from "@/domain/models/material.ts";
 import {Profession, ProfessionSetting} from "@/profession.ts";
 import {Time} from "@/components/time.tsx";
 import {Currency} from "@/components/fantasy-currency.tsx";
+import {ceil} from "@/lib/utils.ts";
 
-export function MetricsCard({metrics, materials}: {
+export function MetricsCard({metrics, materials, userData}: {
 	metrics: CraftingMetrics,
 	userData: UserData,
 	materials: Map<string, Material>,
@@ -34,7 +35,7 @@ export function MetricsCard({metrics, materials}: {
 				))}
 			</div>
 
-			{/* Material Balances */}
+			{/* Material Requirements */}
 			<div className="space-y-2">
 				<h3 className="text-base font-medium mb-2">Material Requirements</h3>
 				{/* Column Headers */}
@@ -63,7 +64,8 @@ export function MetricsCard({metrics, materials}: {
 									<span>{material.name}</span>
 								</div>
 								<span className="text-center">{material.level}</span>
-								<span className="text-center">{Number((balance.produced).toFixed(3))}</span>
+								<span
+									className="text-center">{Number((balance.produced).toFixed(3))}{!userData.passive && `(${ceil(balance.produced, 24) / 24})`}</span>
 								{balance.totalCost ? (
 									<span className="text-right col-span-2">
 										<Currency amount={Math.round(balance.totalCost)}/>
