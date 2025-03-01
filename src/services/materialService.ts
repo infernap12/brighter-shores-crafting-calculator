@@ -1,5 +1,5 @@
 import {Profession} from "@/profession.ts";
-import {useWikiMaterials, useWikiProducts, useWikiSingleMaterial} from "@/hooks/useWiki.ts";
+import {useContainers, useWikiMaterials, useWikiProducts, useWikiSingleMaterial} from "@/hooks/useWiki.ts";
 import {useEffect, useMemo, useState} from "react";
 
 
@@ -41,16 +41,23 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 	const allMaterialsQuery = useWikiMaterials(associatedProfessions, passive);
 	const discoveryQuery = useWikiSingleMaterial(materialToDiscover);
 	const [lastProfession, setLastProfession] = useState(initialProfession);
+	const [lastPassive, setLastPassive] = useState(passive);
+	const containersQuery = useContainers();
 
 	const mats = useMemo(() => {
-		return new Map(allMaterialsQuery?.flatMap((value) => Array.from(value?.data?.entries() || [])) || []);
-	}, [allMaterialsQuery]);
+		return new Map([
+			...allMaterialsQuery?.flatMap((value) => Array.from(value?.data?.entries() || [])) || [],
+			...(containersQuery?.data?.entries() || [])
+		]);
+	}, [allMaterialsQuery, containersQuery]);
+
+	console.log("containers query", containersQuery)
 
 
 	// Combined `isFetching` flag for allMaterialsQuery to check if any query is in a fetching state
 	const allMaterialsFetching = allMaterialsQuery.some(query => query.isFetching);
 
-
+	const isResetting = (initialProfession !== lastProfession) || (passive !== lastPassive);
 	console.log("Material service called with profession:", initialProfession);
 	console.group("Debug: useMaterialService Hook");
 	console.log("Initial Profession:", initialProfession);
@@ -58,7 +65,7 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 	console.log("Associated Professions:", associatedProfessions);
 	console.log("Material to Discover:", materialToDiscover);
 	console.log("Is Non-Ready State:", isNonReady);
-	console.log("Is resetting:", initialProfession !== lastProfession, "")
+	console.log("Is resetting:", isResetting)
 	console.log("Last Profession:", lastProfession);
 	console.log("Products Query:", {
 		data: productsQuery.data,
@@ -78,9 +85,10 @@ export function useMaterialService(initialProfession: Profession, passive: boole
 	});
 	console.groupEnd();
 
-	const isResetting = initialProfession !== lastProfession;
+
 	if (isResetting) {
 		setLastProfession(initialProfession);
+		setLastPassive(passive);
 		setAssociatedProfessions([initialProfession]);
 		setMaterialToDiscover(null);
 		setNonReady(true);

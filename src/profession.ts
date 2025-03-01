@@ -35,7 +35,7 @@ export type WeaponProfession
 	| Profession.Bonewright
 
 export const professionProperties = {
-	[Profession.Alchemist]: {outputCategory: 'Potion'},
+	[Profession.Alchemist]: {outputCategory: 'Potions'},
 	[Profession.Armorer]: {outputCategory: 'Armor'}, // todo
 	[Profession.Blacksmith]: {outputCategory: 'Weapons'},
 	[Profession.Bonewright]: {outputCategory: 'Weapons'},

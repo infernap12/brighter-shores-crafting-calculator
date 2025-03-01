@@ -2,68 +2,74 @@ import {useEffect} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {ceil} from "@/lib/utils.ts";
 import {Avatar, AvatarImage} from "@/components/ui/avatar.tsx";
-import {Material} from "@/domain/models/material.ts";
-import {Profession} from "@/profession.ts";
-import {useWeaponXPCalculations} from "@/hooks/useWeaponXPCalculations.ts";
-import {useFilteredWeapons} from "@/hooks/useFilteredWeapons.ts";
+import {useProductXPCalculations, XPCalculationInputs} from "@/hooks/useProductXPCalculations.ts";
+import {ProductFilters, useFilteredProducts} from "@/hooks/useFilteredProducts.ts";
 import {Product} from "@/domain/models/product.ts";
+import {UserData} from "@/App.tsx";
 
-interface WeaponFilters {
-	profession: Profession;
-	maxLevel: number | null;
-}
 
-interface XPCalculationInputs {
-	neededXp: number;
-	materials: Map<string, Material>;
-}
+export function DataTableContainer(
+	{
+		products,
+		filters,
+		calculationInputs,
+		onSelectProduct,
+		selectedProduct,
+		isNonReady,
+		userData
+	}: {
+		products: Map<string, Product>,
+		filters: ProductFilters,
+		calculationInputs: XPCalculationInputs,
+		onSelectProduct: (product: Product) => void,
+		selectedProduct: Product | null,
+		isNonReady: boolean,
+		userData?: UserData
+	}
+) {
+	console.log("Pre filtered products:", products);
 
-export function DataTableContainer({weapons, filters, calculationInputs, onSelectWeapon, selectedWeapon, isNonReady}: {
-	weapons: Map<string, Product>;
-	filters: WeaponFilters;
-	calculationInputs: XPCalculationInputs;
-	onSelectWeapon: (weapon: Product) => void
-	selectedWeapon: Product | null;
-	isNonReady: boolean;
-}) {
-	const filteredWeapons = useFilteredWeapons(weapons, filters);
-
+	const filteredProducts = useFilteredProducts(products, filters);
+	console.log("Filtered products:", filteredProducts);
 	useEffect(() => {
-		const weaponNotFound = !filteredWeapons.find(w => w.name === selectedWeapon?.name);
-		if (filteredWeapons.length > 0 && weaponNotFound) {
-			onSelectWeapon(filteredWeapons[0]);
+		const isProductFound = filteredProducts.find(w => w.name === selectedProduct?.name);
+		if (filteredProducts.length > 0 && !isProductFound) {
+			onSelectProduct(filteredProducts[0]);
 		}
-	}, [filteredWeapons, onSelectWeapon, selectedWeapon?.name]);
+	}, [filteredProducts, onSelectProduct, selectedProduct?.name]);
 
-	if (filteredWeapons.length === 0) {
-		return <div className="p-4 text-center">No weapons </div>;
+	if (filteredProducts.length === 0) {
+		return <div className="p-4 text-center">No products </div>;
 	}
 
 	return (
-		<WeaponTable
-			weapons={filteredWeapons}
+		<ProductTable
+			userData={userData}
+			products={filteredProducts}
 			calculationInputs={calculationInputs}
-			onSelectWeapon={onSelectWeapon}
+			onSelectProduct={onSelectProduct}
 			isNonReady={isNonReady}
 		/>
 	);
 }
 
-function WeaponTable(
+function ProductTable(
 	{
-		weapons,
+		products,
 		calculationInputs,
-		onSelectWeapon,
+		onSelectProduct,
 		isNonReady,
+		userData
 	}: {
-		weapons: Product[];
-		calculationInputs: XPCalculationInputs;
-		onSelectWeapon: (weapon: Product) => void;
-		isNonReady: boolean;
+		products: Product[],
+		calculationInputs: XPCalculationInputs,
+		onSelectProduct: (product: Product) => void,
+		isNonReady: boolean,
+		userData?: UserData
 	}
 ) {
 
-	const weaponXp = useWeaponXPCalculations(weapons, calculationInputs, isNonReady);
+	const productXpResults = useProductXPCalculations(products, calculationInputs, isNonReady);
 
 	return (
 		<Table>
@@ -84,29 +90,30 @@ function WeaponTable(
 
 			<TableBody>
 				{
-					weapons
-						.map((weapon: Product) => {
-							const totalXp = weaponXp.get(weapon.fullName);
+					products
+						.map((product: Product) => {
+							const totalXp = productXpResults.get(product.fullName);
+							const isAboveLevel = (userData?.currentLevel ?? Infinity) < product.level;
 							if (totalXp === undefined) {
 								return null;
 							}
 							const craftsNeeded = ceil(calculationInputs.neededXp / totalXp);
 							return (
 								<TableRow
-									key={weapon.fullName}
-									className="cursor-pointer hover:bg-gray-100"
-									onClick={() => onSelectWeapon(weapon)}
+									key={product.fullName}
+									className={`cursor-pointer ${isAboveLevel ? "bg-yellow-100 hover:bg-yellow-200" : "hover:bg-gray-100"}`}
+									onClick={() => onSelectProduct(product)}
 								>
 									<TableCell>
 										<Avatar>
 											<AvatarImage
-												src={weapon.imageUrl}
-												alt={weapon.name}
+												src={product.imageUrl}
+												alt={product.name}
 											/>
 										</Avatar>
 									</TableCell>
-									<TableCell>{weapon.level}</TableCell>
-									<TableCell>{weapon.fullName}</TableCell>
+									<TableCell>{product.level}</TableCell>
+									<TableCell>{product.fullName}</TableCell>
 									<TableCell>{totalXp.toLocaleString()}</TableCell>
 									<TableCell>{craftsNeeded.toLocaleString()}</TableCell>
 								</TableRow>

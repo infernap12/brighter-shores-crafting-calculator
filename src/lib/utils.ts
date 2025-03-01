@@ -9,7 +9,7 @@ const levelXP = [0, 500, 1015, 1545, 2090, 2651, 3229, 4418, 5642, 6902, 8199, 9
 ];
 
 export function getLevelForXp(xp: number): number {
-	const level = levelXP.findIndex(levelXp => levelXp >= xp);
+	const level = levelXP.findLastIndex(levelXp => levelXp <= xp);
 	console.log(
 		"xp", xp,
 		"level", level);

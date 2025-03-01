@@ -1,18 +1,19 @@
-import {WeaponCard} from "@/components/WeaponCard.tsx";
+import {ItemCard} from "@/components/ItemCard.tsx";
 import {Product} from "@/domain/models/product.ts";
-import {resolveClassic, resolveTotalXp} from "@/domain/services/calculatorService.ts";
+import {resolveTotalXp} from "@/domain/services/calculatorService.ts";
 import {useEffect, useMemo, useState} from 'react';
 import {Material} from "@/domain/models/material.ts";
 import {InputForm, InputFormValues} from "@/components/InputForm.tsx";
 import {DataTableContainer} from "@/components/DataTable.tsx";
 import {Profession, professionProperties, ProfessionSetting} from "@/profession.ts";
-import {DataTableSkeleton, WeaponCardSkeleton} from "@/components/skeleton-loaders.tsx";
+import {DataTableSkeleton, ItemCardSkeleton} from "@/components/skeleton-loaders.tsx";
 import {ceil} from "@/lib/utils.ts";
 import {calculateCraftingMetrics} from "@/services/crafting-calculator.ts";
 import {NetworkStatus} from "@/components/NetworkStatus.tsx";
 import {MetricsCard} from "@/components/mc.tsx";
 import {useMaterialService} from "@/services/materialService.ts";
 import {AssociatedProfessionsForm} from "@/components/ProfessionInputs.tsx";
+import {useProfessionSettings} from "@/hooks/useProfessionSettings.ts";
 
 
 export interface UserData extends InputFormValues {
@@ -28,36 +29,37 @@ function App() {
 		allMaterialsQuery,
 		productsQuery: productsQuery,
 		isNonReady,
-	} = useMaterialService(userData?.profession ?? Profession.Stonemason);
-	const weapons = productsQuery?.data;
-	const [selectedWeapon, setSelectedWeapon] = useState<Product | null>(null);
+	} = useMaterialService(userData?.profession ?? Profession.Stonemason, userData?.passive ?? false);
+	const products = productsQuery?.data;
+	const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
 
-	const [professionSettings, setProfessionSettings] = useState<Map<Profession, ProfessionSetting>>(new Map);
+	const [professionSettings, setProfessionSettings] = useProfessionSettings();
+
 	console.log("Profession Settings:", professionSettings)
 	// todo
 	// const [craftMetrics, setCraftMetrics] = useState<CraftingMetrics | null>(null);
-	// Set default selected weapon when weapons are loaded
+	// Set default selected weapon when products are loaded
 	useEffect(() => {
-		if (weapons && Array.from(weapons.values()).length > 0 && !selectedWeapon) {
-			setSelectedWeapon(Array.from(weapons.values())[0]);
+		if (products && Array.from(products.values()).length > 0 && !selectedProduct) {
+			setSelectedProduct(Array.from(products.values())[0]);
 		}
-	}, [weapons,]);
+	}, [products,]);
 
 	function onChange(inputs: InputFormValues) {
 		const userData = inputs as UserData;
 		// The cross-calculations are now handled in the InputForm component
 		userData.neededXp = (userData.targetXP ?? 0) - (userData.currentXP ?? 0);
-		if (selectedWeapon && userData.profession !== selectedWeapon.profession) {
-			setSelectedWeapon(null);
+		if (selectedProduct && (userData.profession !== selectedProduct.profession || userData.passive !== selectedProduct.passive)) {
+			setSelectedProduct(null);
 		}
 		setUserData(userData);
 	}
 
-	function onWeaponSelected(weapon: Product) {
-		const crafts = ceil((userData?.neededXp ?? 0) / resolveTotalXp(weapon, materials)) ?? 12
-		console.log("Calculating metrics! Hold onto ya buts!", crafts, weapon)
-		setSelectedWeapon(weapon)
+	function onProductSelected(product: Product) {
+		const crafts = ceil((userData?.neededXp ?? 0) / resolveTotalXp(product, materials)) ?? 12
+		console.log("Calculating metrics! Hold onto ya buts!", crafts, product)
+		setSelectedProduct(product)
 	}
 
 	return (
@@ -94,6 +96,7 @@ function App() {
 								<AssociatedProfessionsForm
 									associatedProfessions={associatedProfessions.filter(p => p !== userData?.profession)}
 									onChange={setProfessionSettings}
+									initialSettings={professionSettings}
 								/>
 							)}
 
@@ -102,7 +105,7 @@ function App() {
 						{/* Card - between form and table on mobile, right side on md+ */}
 						<div className="w-full md:w-2/3 order-3 md:order-2">
 							<ItemDisplay
-								weapon={selectedWeapon}
+								item={selectedProduct}
 								userData={userData}
 								materials={materials}
 								isNonReady={isNonReady}
@@ -114,23 +117,24 @@ function App() {
 
 					{/* Bottom section - Table */}
 					<div className="w-full">
-						{!isNonReady && weapons && materials && userData && (
+						{!isNonReady && products && materials && userData && (
 							<DataTableContainer
-								weapons={weapons}
+								userData={userData}
+								products={products}
 								filters={{
 									profession: userData.profession,
-									maxLevel: userData.targetLevel ?? null
+									maxLevel: userData.targetLevel ?? 500
 								}}
 								calculationInputs={{
 									materials: materials,
 									neededXp: userData.neededXp
 								}}
-								onSelectWeapon={onWeaponSelected}
-								selectedWeapon={selectedWeapon}
+								onSelectProduct={onProductSelected}
+								selectedProduct={selectedProduct}
 								isNonReady={isNonReady}
 							/>
 						)}
-						{(!weapons || !materials || isNonReady) && (
+						{(!products || !materials || isNonReady) && (
 							<DataTableSkeleton/>
 						)}
 					</div>
@@ -143,23 +147,31 @@ function App() {
 
 export default App
 
-function ItemDisplay({weapon, materials, userData, isNonReady, professionSettings}: {
-	weapon: Product | null,
+function ItemDisplay({item, materials, userData, isNonReady, professionSettings}: {
+	item: Product | null,
 	materials: Map<string, Material> | null,
 	userData: UserData | null,
 	isNonReady: boolean,
 	professionSettings: Map<Profession, ProfessionSetting>
 }) {
 	const metric = useMemo(() => {
-		if (!weapon || !materials || !userData || isNonReady) return null;
+		if (!item || !materials || !userData || isNonReady) return null;
 		console.log(isNonReady)
-		console.log("Calculating metrics!", weapon, materials, userData, isNonReady)
-		const totalXp = resolveClassic(weapon, materials)
-		const crafts = userData.neededXp / totalXp
-		return calculateCraftingMetrics(weapon, crafts, professionSettings, materials);
-	}, [weapon, materials, userData, isNonReady, professionSettings])
+		const totalXp = resolveTotalXp(item, materials)
+		const quantity = userData.neededXp / (totalXp / item.recipe.outputQuantity)
+		console.group("Calculating metrics!");
+		console.log("Item:", item);
+		console.log("Materials:", materials);
+		console.log("UserData:", userData);
+		console.log("IsNonReady:", isNonReady);
+		console.log("ProfessionSettings:", professionSettings);
+		console.log("TotalXp:", totalXp);
+		console.log("Quantity:", quantity);
+		console.groupEnd();
+		return calculateCraftingMetrics(item, quantity, professionSettings, materials);
+	}, [item, materials, userData, isNonReady, professionSettings])
 
-	if (!weapon || !materials || !userData || !metric || isNonReady) return <WeaponCardSkeleton/>
+	if (!item || !materials || !userData || !metric || isNonReady) return <ItemCardSkeleton/>
 	// if (!weapon) return <div className="p-4 text-gray-500">Select a weapon to view details</div>;
 
 	if (!materials) {
@@ -167,11 +179,11 @@ function ItemDisplay({weapon, materials, userData, isNonReady, professionSetting
 	}
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<WeaponCard
-				weapon={weapon}
+			<ItemCard
+				product={item}
 				materials={materials}
 				calculations={{
-					totalXp: resolveTotalXp(weapon, materials)
+					totalXp: resolveTotalXp(item, materials)
 				}}
 			/>
 			<MetricsCard

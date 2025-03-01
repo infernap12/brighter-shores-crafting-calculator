@@ -82,12 +82,15 @@ export type Printrequests =
 	keyof Printouts
 	| "-Dropped item.Dropped from.Activity JSON=Activity JSON"
 	| "-Sold item.Shop buy price=Shop buy price"
-	| "-Sold item.Shop sell price=Shop sell price";
+	| "-Sold item.Shop sell price=Shop sell price"
+	| "Variant of.Action per hour banking=Action per hour banking";
 
 
 
 export interface Printouts {
 	"Activity JSON"?:            string[];
+	"Action per hour banking"?:  number[];
+	"Action per hour discarding"?:number[];
 	"Activity KP"?:              number[];
 	"Activity XP"?:              number[];
 	"Activity album XP"?:        number[];

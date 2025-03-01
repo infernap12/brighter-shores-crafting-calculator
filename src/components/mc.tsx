@@ -3,8 +3,11 @@ import {UserData} from "@/App.tsx";
 import {Avatar, AvatarImage} from "@/components/ui/avatar";
 import {Material} from "@/domain/models/material.ts";
 import {Profession, ProfessionSetting} from "@/profession.ts";
+import {Time} from "@/components/time.tsx";
+import {Currency} from "@/components/fantasy-currency.tsx";
+import {ceil} from "@/lib/utils.ts";
 
-export function MetricsCard({metrics, materials}: {
+export function MetricsCard({metrics, materials, userData}: {
 	metrics: CraftingMetrics,
 	userData: UserData,
 	materials: Map<string, Material>,
@@ -19,11 +22,11 @@ export function MetricsCard({metrics, materials}: {
 
 	return (
 		<div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
-			<h3 className="font-semibold mb-4">Crafting Summary</h3>
+			<h2 className="text-xl font-semibold mb-4">Crafting Summary</h2>
 
 			{/* Profession Totals */}
 			<div className="space-y-2 mb-4">
-				<h4 className="text-sm font-medium">Profession Totals</h4>
+				<h3 className="text-base font-medium mb-2">Profession Totals</h3>
 				{Array.from(metrics.professionTotals.entries()).map(([profession, stats]) => (
 					<div key={profession} className="flex justify-between text-sm">
 						<span>{profession}</span>
@@ -32,18 +35,25 @@ export function MetricsCard({metrics, materials}: {
 				))}
 			</div>
 
-			{/* Material Balances */}
+			{/* Material Requirements */}
 			<div className="space-y-2">
-				<h4 className="text-sm font-medium">Material Requirements</h4>
+				<h3 className="text-base font-medium mb-2">Material Requirements</h3>
+				{/* Column Headers */}
+				<div className="grid grid-cols-7 items-center text-sm gap-4 font-medium">
+					<div className="col-span-3">Material</div>
+					<span className="text-center">lv</span>
+					<span className="text-center">Amount</span>
+					<span className="text-right col-span-2">Cost/Time</span>
+				</div>
 				{Array.from(metrics.materialBalances.entries())
 					.filter((balanceEntry) => balanceEntry[1].required > 0)
 					.map(([name, balance]) => {
 						const material = materials.get(name)!;
-						const time = balance.produced * material.duration;
+						const time = balance.batches * material.duration;
 						return (
 
-							<div key={material.name} className="grid grid-cols-4 items-center text-sm gap-4">
-								<div className="flex items-center justify-start col-span-2">
+							<div key={material.name} className="grid grid-cols-7 items-center text-sm gap-4">
+								<div className="flex items-center justify-start col-span-3">
 									{/* Avatar for the material */}
 									<Avatar className="w-6 h-6 mr-2">
 										<AvatarImage
@@ -53,14 +63,16 @@ export function MetricsCard({metrics, materials}: {
 									</Avatar>
 									<span>{material.name}</span>
 								</div>
-								<span className="text-center">Craft: {balance.produced.toFixed()}</span>
+								<span className="text-center">{material.level}</span>
+								<span
+									className="text-center">{Number((balance.produced).toFixed(3))}{!userData.passive && `(${ceil(balance.produced, 24) / 24})`}</span>
 								{balance.totalCost ? (
-									<span className="text-right">
-                                    Cost: {(balance.totalCost).toLocaleString()}
+									<span className="text-right col-span-2">
+										<Currency amount={Math.round(balance.totalCost)}/>
 									</span>
 								) : (
-									<span className="text-right">
-										{new Date(time * 1000).toISOString().slice(11, 19)}
+									<span className="text-right col-span-2">
+										<Time seconds={time}/>
 									</span>
 								)}
 							</div>
@@ -74,9 +86,7 @@ export function MetricsCard({metrics, materials}: {
 					<span>Total Duration:</span>
 
 					<span>
-						{new Date(metrics.totalDuration * 1000)
-							.toISOString()
-							.slice(11, 19) /* Formats as HH:mm:ss */}
+						<Time seconds={metrics.totalDuration}/>
 					</span>
 				</div>
 				<div className="flex justify-between text-sm font-medium">
@@ -89,7 +99,7 @@ export function MetricsCard({metrics, materials}: {
 				</div>
 				<div className="flex justify-between text-sm font-medium">
 					<span>Total Cost:</span>
-					<span>{totalCost.toLocaleString()}</span>
+					<span><Currency amount={Math.round(totalCost)}/></span>
 				</div>
 			</div>
 		</div>

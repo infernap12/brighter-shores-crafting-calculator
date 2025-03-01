@@ -1,7 +1,7 @@
 import {Skeleton} from "@/components/ui/skeleton";
 
 
-export function WeaponCardSkeleton() {
+export function ItemCardSkeleton() {
 	return (
 		<div className="rounded-lg border p-4 space-y-4 max-w-sm">
 			<div className="text-center space-y-1">

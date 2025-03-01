@@ -2,9 +2,10 @@ import {Item} from "@/domain/models/item.ts";
 import {Recipe} from "@/domain/models/recipe.ts";
 import {Profession} from "@/profession.ts";
 import {Activity} from "@/domain/models/activity.ts";
+import {Product} from "@/domain/models/product.ts";
 
 export class Material implements Item {
-	constructor(public imageUrl: string, public fullName: string, recipe: Recipe | undefined, activity: Activity | undefined, public description: string, public variant: string, public name: string, public cost: number, public value: number, public link: string, public profession: Profession, public passive: boolean, public level: number) {
+	constructor(public imageUrl: string, public fullName: string, recipe: Recipe | undefined, activity: Activity | undefined, public description: string, public variantName: string, public name: string, public cost: number, public value: number, public link: string, public profession: Profession, public passive: boolean, public level: number) {
 
 
 		if (recipe) {
@@ -27,7 +28,7 @@ export class Material implements Item {
 			this.activity = activity;
 			this.cost = cost;
 			this.value = value;
-		} else if (cost && value) {
+		} else if (cost || value) {
 			this.xp = 0;
 			this.kp = 0;
 			this.duration = 0;
@@ -55,5 +56,19 @@ export class Material implements Item {
 	activity: Activity | undefined;
 	recipe: Recipe | undefined;
 
-
+	static fromProduct(product: Product): Material {
+		const {
+			description,
+			fullName,
+			imageUrl,
+			level,
+			link,
+			name,
+			passive,
+			profession,
+			recipe,
+			variantName
+		} = product;
+		return new Material(imageUrl,fullName, recipe, undefined, description, variantName, name, 0, 0, link, profession, passive, level);
+	}
 }

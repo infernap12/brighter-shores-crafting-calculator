@@ -8,6 +8,16 @@ import {QueryClient} from "@tanstack/react-query";
 import {PersistQueryClientOptions, PersistQueryClientProvider} from "@tanstack/react-query-persist-client";
 import {createIDBPersister} from "@/services/api/idbPersist.ts";
 
+declare global {
+	interface Window {
+		__DEBUG__: DebugHelpers; // Or define a more specific type
+	}
+}
+
+interface DebugHelpers {
+	queryClient: QueryClient;
+}
+
 const queryClient = new QueryClient({
 	defaultOptions: {
 		queries: {
@@ -17,7 +27,11 @@ const queryClient = new QueryClient({
 	},
 });
 
-const persister = createIDBPersister();
+window.__DEBUG__ = {
+	queryClient
+};
+
+const persister = createIDBPersister()
 
 // const persister = createSyncStoragePersister({
 // 	storage: window.localStorage,

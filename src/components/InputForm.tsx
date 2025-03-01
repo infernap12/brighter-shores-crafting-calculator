@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {FormSwitch} from "@/components/ui/formSwitch.tsx";
 
 const formSchema = z.object({
 	profession: z.nativeEnum(Profession),
+	passive: z.boolean().default(false),
 	currentLevel: z.number()
 		.nullable()
 		.refine(
@@ -77,6 +79,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			profession: Profession.Stonemason,
+			passive: false,
 			currentLevel: 1,
 			targetLevel: 10,
 			currentXP: undefined,
@@ -91,6 +94,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 	const targetLevel = form.watch("targetLevel");
 	const targetXP = form.watch("targetXP");
 	const profession = form.watch("profession");
+	const passive = form.watch("passive");
 
 	useEffect(() => {
 		const updateFormValues = () => {
@@ -139,39 +143,58 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 		};
 
 		updateFormValues();
-	}, [currentLevel, currentXP, targetLevel, targetXP, profession, form]);
+	}, [currentLevel, currentXP, targetLevel, targetXP, profession, passive, form]);
 
 	return (
 		<Form {...form}>
 			<form className="space-y-6">
-				{/* Profession Selection */}
-				<FormField
-					control={form.control}
-					name="profession"
-					render={({field}) => (
-						<FormItem>
-							<FormLabel>Profession</FormLabel>
-							<Select
-								onValueChange={field.onChange}
-								defaultValue={field.value}
-							>
+				<div className="flex gap-4 items-end">
+					{/* Profession Selection */}
+					<FormField
+						control={form.control}
+						name="profession"
+						render={({field}) => (
+							<FormItem className="flex-grow">
+								<FormLabel>Profession</FormLabel>
+								<Select
+									onValueChange={field.onChange}
+									defaultValue={field.value}
+								>
+									<FormControl>
+										<SelectTrigger>
+											<SelectValue placeholder="Select a profession"/>
+										</SelectTrigger>
+									</FormControl>
+									<SelectContent>
+										{[Profession.Alchemist, Profession.Blacksmith, Profession.Stonemason, Profession.Bonewright, Profession.Leatherworker].map((prof) => (
+											<SelectItem key={prof} value={prof}>
+												{prof}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<FormMessage/>
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="passive"
+						render={({field}) => (
+							<FormItem>
+								<FormLabel>Passive</FormLabel>
 								<FormControl>
-									<SelectTrigger>
-										<SelectValue placeholder="Select a profession"/>
-									</SelectTrigger>
+									<FormSwitch
+										checked={field.value}
+										onCheckedChange={field.onChange}
+									/>
 								</FormControl>
-								<SelectContent>
-									{[Profession.Blacksmith, Profession.Stonemason, Profession.Bonewright, Profession.Leatherworker].map((prof) => (
-										<SelectItem key={prof} value={prof}>
-											{prof}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormMessage/>
-						</FormItem>
-					)}
-				/>
+							</FormItem>
+						)}
+					/>
+				</div>
+
 
 				{/* Level and XP Inputs */}
 				<div className="grid grid-cols-2 gap-4">
