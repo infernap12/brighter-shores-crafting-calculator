@@ -154,7 +154,7 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 						control={form.control}
 						name="profession"
 						render={({field}) => (
-							<FormItem className="flex-grow">
+							<FormItem className="grow">
 								<FormLabel>Profession</FormLabel>
 								<Select
 									onValueChange={field.onChange}
