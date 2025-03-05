@@ -2,7 +2,7 @@ import {Product} from "@/domain/models/product.ts";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx";
 import {Material} from "@/domain/models/material.ts";
-import {Currency} from "@/components/fantasy-currency.tsx";
+import {Currency} from "@infernap12/bs-components";
 
 export function ItemCard({product, calculations, materials}: {
 	product: Product,
