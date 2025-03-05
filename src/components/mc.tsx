@@ -21,7 +21,7 @@ export function MetricsCard({metrics, materials, userData}: {
 
 
 	return (
-		<div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+		<div className="rounded-lg border bg-card text-card-foreground shadow-xs p-4">
 			<h2 className="text-xl font-semibold mb-4">Crafting Summary</h2>
 
 			{/* Profession Totals */}
