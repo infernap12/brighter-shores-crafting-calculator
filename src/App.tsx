@@ -10,7 +10,7 @@ import {DataTableSkeleton, ItemCardSkeleton} from "@/components/skeleton-loaders
 import {ceil} from "@/lib/utils.ts";
 import {calculateCraftingMetrics} from "@/services/crafting-calculator.ts";
 import {NetworkStatus} from "@/components/NetworkStatus.tsx";
-import {MetricsCard} from "@/components/mc.tsx";
+import {MetricsCard} from "@/components/MetricsCard.tsx";
 import {useMaterialService} from "@/services/materialService.ts";
 import {AssociatedProfessionsForm} from "@/components/ProfessionInputs.tsx";
 import {useProfessionSettings} from "@/hooks/useProfessionSettings.ts";
