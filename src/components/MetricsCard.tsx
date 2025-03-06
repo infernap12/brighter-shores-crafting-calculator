@@ -4,7 +4,7 @@ import {Avatar, AvatarImage} from "@/components/ui/avatar";
 import {Material} from "@/domain/models/material.ts";
 import {Profession, ProfessionSetting} from "@/profession.ts";
 import {Time} from "@/components/time.tsx";
-import {Currency} from "@/components/fantasy-currency.tsx";
+import {Currency} from "@infernap12/bs-components";
 import {ceil} from "@/lib/utils.ts";
 
 export function MetricsCard({metrics, materials, userData}: {
@@ -21,7 +21,7 @@ export function MetricsCard({metrics, materials, userData}: {
 
 
 	return (
-		<div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+		<div className="rounded-lg border bg-card text-card-foreground shadow-xs p-4">
 			<h2 className="text-xl font-semibold mb-4">Crafting Summary</h2>
 
 			{/* Profession Totals */}
