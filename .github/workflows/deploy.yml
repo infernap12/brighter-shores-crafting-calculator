@@ -35,6 +35,12 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
+      - name: Configure npm registry
+        run: |
+          echo "@infernap12:registry=https://nexus.infernap12.com/repository/npm-group/" > .npmrc
+          echo "//nexus.infernap12.com/repository/npm-group/:username=${{ secrets.NEXUS_USERNAME }}" >> .npmrc
+          echo "//nexus.infernap12.com/repository/npm-group/:_password=$(echo -n ${{ secrets.NEXUS_PASSWORD }} | base64)" >> .npmrc
+          echo "//nexus.infernap12.com/repository/npm-group/:always-auth=true" >> .npmrc
       - name: Install dependencies
         run: npm install
       - name: Build
