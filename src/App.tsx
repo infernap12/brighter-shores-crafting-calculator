@@ -7,7 +7,7 @@ import {InputForm, InputFormValues} from "@/components/InputForm.tsx";
 import {DataTableContainer} from "@/components/DataTable.tsx";
 import {Profession, professionProperties, ProfessionSetting} from "@/profession.ts";
 import {DataTableSkeleton, ItemCardSkeleton} from "@/components/skeleton-loaders.tsx";
-import {ceil} from "@/lib/utils.ts";
+import {ceil, getXpForLevel, getXpForLevelAndRemaining} from "@/lib/utils.ts";
 import {calculateCraftingMetrics} from "@/services/crafting-calculator.ts";
 import {NetworkStatus} from "@/components/NetworkStatus.tsx";
 import {MetricsCard} from "@/components/MetricsCard.tsx";
@@ -17,6 +17,8 @@ import {useProfessionSettings} from "@/hooks/useProfessionSettings.ts";
 
 
 export interface UserData extends InputFormValues {
+	currentXp: number;
+	targetXP: number;
 	neededXp: number;
 }
 
@@ -48,8 +50,9 @@ function App() {
 
 	function onChange(inputs: InputFormValues) {
 		const userData = inputs as UserData;
-		// The cross-calculations are now handled in the InputForm component
-		userData.neededXp = (userData.targetXP ?? 0) - (userData.currentXP ?? 0);
+		userData.currentXp = getXpForLevelAndRemaining(userData.currentLevel, userData.xpToNextLevel);
+		userData.targetXP = getXpForLevel(userData.targetLevel);
+		userData.neededXp = userData.targetXP - userData.currentXp;
 		if (selectedProduct && (userData.profession !== selectedProduct.profession || userData.passive !== selectedProduct.passive)) {
 			setSelectedProduct(null);
 		}
@@ -62,13 +65,19 @@ function App() {
 		setSelectedProduct(product)
 	}
 
+	const productString = (() => {
+		if (associatedProfessions[0] in professionProperties) {
+			return professionProperties[associatedProfessions[0] as keyof typeof professionProperties].outputCategory;
+		}
+	})()
+
 	return (
 		<>
 			<div className="container mx-auto p-4">
 				<NetworkStatus
 					queries={[
 						...(productsQuery ? [{
-							name: `${professionProperties[associatedProfessions[0]].outputCategory}`,
+							name: `${productString}`,
 							isPending: productsQuery.isPending,
 							isFetching: productsQuery.isFetching
 						}] : []),

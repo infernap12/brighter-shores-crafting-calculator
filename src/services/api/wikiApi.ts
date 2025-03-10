@@ -1,21 +1,22 @@
 import {Profession} from "@/profession.ts";
+import packageJson from "../../../package.json";
 
 import {Ask, askParams, Convert, Printrequests, Result} from "@/services/api/askApi.ts";
 
 
 const apiUrl = "https://brightershoreswiki.org/api.php?";
-// const userAgent = 'Brighter Shores Weapon calc v0.1-dev (github.com/infernap12/brighter-shores-weapon-calculator); ([[User:Infernap12]])';
+const userAgent = `Brighter Shores Crafting Calculator v${packageJson.version} (github.com/infernap12/brighter-shores-crafting-calculator); ([[User:Infernap12]])`;
 
-// const fetchConfig = {
-// 	headers: {
-// 		'User-Agent': userAgent
-// 	}
-// };
+const fetchConfig = {
+	headers: {
+		'User-Agent': userAgent
+	}
+};
 
 // const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const urlParams = (query: string, maxlag: number = 5) => {
-	return new URLSearchParams({action: "ask", query: query, format: "json", maxlag: maxlag.toString()});
+	return new URLSearchParams({action: "ask", origin: "*", query: query, format: "json", maxlag: maxlag.toString()});
 };
 
 
@@ -79,7 +80,7 @@ export class WikiApi {
 
 	static async fetchWikiPage(params: SMWQueryConfig): Promise<Ask> {
 		const query = this.buildQuery(params);
-		const response = await fetch(apiUrl + urlParams(query).toString());
+		const response = await fetch(apiUrl + urlParams(query).toString(), fetchConfig);
 		return Convert.toAsk(await response.text());
 	}
 

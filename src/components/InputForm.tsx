@@ -1,6 +1,6 @@
 import {Profession} from "@/profession.ts";
 import {z} from "zod";
-import {getLevelForXp, getXpForLevel} from "@/lib/utils.ts";
+import {getXpForLevel} from "@/lib/utils.ts";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
 import {useEffect} from "react";
@@ -20,7 +20,6 @@ const formSchema = z.object({
 	profession: z.nativeEnum(Profession),
 	passive: z.boolean().default(false),
 	currentLevel: z.number()
-		.nullable()
 		.refine(
 			(val) => {
 				// console.log("Refining value:", val);
@@ -29,46 +28,45 @@ const formSchema = z.object({
 			"Level must be between 1 and 500"
 		),
 	targetLevel: z.number()
-		.nullable()
 		.refine(
 			(val) => val === null || (val >= 1 && val <= 500),
 			"Level must be between 1 and 500"
 		),
-	currentXP: z.number()
-		.nullable()
+	xpToNextLevel: z.number()
+		.optional()
 		.refine(
-			(val) => val === null || (val >= 0 && val <= 1861867989),
-			"Xp must be between 0 and 1,861,867,989"
-		),
-	targetXP: z.number()
-		.nullable()
-		.refine(
-			(val) => val === null || (val >= 0 && val <= 1861867989),
+			(val) => {
+				if (val === undefined) {
+					return true;
+				}
+				return val >= 0 && val <= 1861867989;
+			},
 			"Xp must be between 0 and 1,861,867,989"
 		),
 }).refine(
 	(data) => {
-		const hasCurrentValue = data.currentLevel !== null || data.currentXP !== null;
-		const hasTargetValue = data.targetLevel !== null || data.targetXP !== null;
-		return hasCurrentValue && hasTargetValue;
+		const currentLevel = data.currentLevel;
+		const targetLevel = data.targetLevel;
+
+		return targetLevel > currentLevel;
 	},
 	{
-		message: "You must provide either level or XP for both current and target values"
+		message: "Target Level must be greater than current XP"
 	}
 ).refine(
 	(data) => {
-		const currentXp = data.currentXP !== null
-			? data.currentXP
-			: (data.currentLevel !== null ? getXpForLevel(data.currentLevel) : 0);
+		const {currentLevel, xpToNextLevel: inputXpToNextLevel} = data;
 
-		const targetXp = data.targetXP !== null
-			? data.targetXP
-			: (data.targetLevel !== null ? getXpForLevel(data.targetLevel) : 0);
+		// Early neck
+		if (inputXpToNextLevel === null || inputXpToNextLevel === undefined) {
+			return true;
+		}
 
-		return targetXp > currentXp;
-	},
-	{
-		message: "Target XP must be greater than current XP"
+		const currentLevelTotalXp = getXpForLevel(currentLevel);
+		const nextLevelTotalXp = getXpForLevel(currentLevel + 1);
+		const maxPossibleXpToNextLevel = nextLevelTotalXp - currentLevelTotalXp;
+
+		return inputXpToNextLevel <= maxPossibleXpToNextLevel && inputXpToNextLevel >= 1;
 	}
 );
 
@@ -82,21 +80,11 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 			passive: false,
 			currentLevel: 1,
 			targetLevel: 10,
-			currentXP: undefined,
-			targetXP: undefined,
-
+			xpToNextLevel: undefined,
 		},
 	});
 
-
-	const currentLevel = form.watch("currentLevel");
-	const currentXP = form.watch("currentXP");
-	const targetLevel = form.watch("targetLevel");
-	const targetXP = form.watch("targetXP");
-	const profession = form.watch("profession");
-	const passive = form.watch("passive");
-
-	useEffect(() => {
+	/*useEffect(() => {
 		const updateFormValues = () => {
 			const values = form.getValues();
 
@@ -143,7 +131,16 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 		};
 
 		updateFormValues();
-	}, [currentLevel, currentXP, targetLevel, targetXP, profession, passive, form]);
+	}, [currentLevel, currentXP, targetLevel, targetXP, profession, passive, form]);*/
+
+	useEffect(() => {
+		// Only trigger parent onChange if we have all required values
+		const values = form.getValues();
+		if (values.profession !== undefined) {
+			onChange(values);
+		}
+		void form.trigger();
+	}, [form,]);
 
 	return (
 		<Form {...form}>
@@ -223,10 +220,10 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 
 						<FormField
 							control={form.control}
-							name="currentXP"
+							name="targetLevel"
 							render={({field}) => (
 								<FormItem>
-									<FormLabel>Current XP</FormLabel>
+									<FormLabel>Target Level</FormLabel>
 									<FormControl>
 										<Input
 											type="number"
@@ -244,29 +241,10 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 					<div className="space-y-4">
 						<FormField
 							control={form.control}
-							name="targetLevel"
+							name="xpToNextLevel"
 							render={({field}) => (
 								<FormItem>
-									<FormLabel>Target Level</FormLabel>
-									<FormControl>
-										<Input
-											type="number"
-											{...field}
-											value={field.value ?? ""}
-											onChange={e => field.onChange(e.target.value ? Number(e.target.value) : null)}
-										/>
-									</FormControl>
-									<FormMessage/>
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="targetXP"
-							render={({field}) => (
-								<FormItem>
-									<FormLabel>Target XP</FormLabel>
+									<FormLabel>XP remaining</FormLabel>
 									<FormControl>
 										<Input
 											type="number"

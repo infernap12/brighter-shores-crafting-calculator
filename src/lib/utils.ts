@@ -1,4 +1,4 @@
-import {clsx, type ClassValue} from "clsx";
+import {type ClassValue, clsx} from "clsx";
 import {twMerge} from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -20,6 +20,12 @@ export function getXpForLevel(level: number): number {
 	const xp = levelXP[level];
 	console.log("level", level, "xp", xp);
 	return xp ?? 0;
+}
+
+export function getXpForLevelAndRemaining(level: number, xpToNext?: number) {
+	return xpToNext
+		? getXpForLevel(level + 1) - xpToNext
+		: getXpForLevel(level);
 }
 
 /**

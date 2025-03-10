@@ -50,8 +50,16 @@ const MATERIALS_PRINTREQUESTS: Printrequests[] = [
 ];
 
 export function useWikiProducts(profession: Profession = Profession.Stonemason, passive: boolean) {
-	const craftType = passive ? "Pages with recipes" : professionProperties[profession].outputCategory;
-	console.log("useWikiProducts called with professions: ", profession);
+	console.log("useWikiProducts called with profession: ", profession);
+
+	const craftType = (() => {
+		if (passive) return "Pages with recipes";
+		if (profession in professionProperties) {
+			return professionProperties[profession as keyof typeof professionProperties].outputCategory;
+		}
+		console.error("Profession does not have obvious output category: ", profession)
+		return "";
+	})();
 	return useQuery({
 		queryKey: ["wiki", "products", craftType, profession, passive],
 		queryFn: async () => {
