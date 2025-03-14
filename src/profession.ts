@@ -33,8 +33,8 @@ export type WeaponProfession
 export const professionProperties = {
 	[Profession.Alchemist]: {outputCategory: 'Potions'},
 	[Profession.Armorer]: {outputCategory: 'Armor'}, // todo
-	[Profession.Blacksmith]: {outputCategory: 'Weapons'},
-	[Profession.Bonewright]: {outputCategory: 'Weapons'},
+	[Profession.Blacksmith]: {outputCategory: 'Cryoknight Equipment'},
+	[Profession.Bonewright]: {outputCategory: 'Guardian Equipment'},
 	[Profession.Builder]: {outputCategory: 'Buildings?'}, // todo
 	[Profession.Carpenter]: {outputCategory: 'posts?'}, // todo
 	[Profession.Chef]: {outputCategory: 'Food'},
@@ -46,7 +46,7 @@ export const professionProperties = {
 	[Profession.Merchant]: {outputCategory: 'Goods'}, // todo
 	[Profession.Miner]: {outputCategory: 'Ores'}, // todo
 	[Profession.Woodcutter]: {outputCategory: 'Lumber'}, // todo
-	[Profession.Stonemason]: {outputCategory: 'Weapons'},
+	[Profession.Stonemason]: {outputCategory: 'Hammermage Equipment'},
 	[Profession.Leatherworker]: {outputCategory: 'Leather'},
 } as const;
 

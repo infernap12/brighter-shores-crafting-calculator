@@ -142,6 +142,20 @@ export function InputForm({onChange}: { onChange: (input: InputFormValues) => vo
 		void form.trigger();
 	}, [form,]);
 
+	useEffect(() => {
+		// Subscribe to form changes
+		const subscription = form.watch((value) => {
+			// Only call onChange if the form is valid
+			if (form.formState.isValid) {
+				onChange(value as InputFormValues);
+			}
+		});
+
+		// Cleanup subscription on unmount
+		return () => subscription.unsubscribe();
+	}, [form, onChange]);
+
+
 	return (
 		<Form {...form}>
 			<form className="space-y-6">
